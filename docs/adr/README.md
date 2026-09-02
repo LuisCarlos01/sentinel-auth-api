@@ -18,3 +18,4 @@ Este diretório reúne os registros de decisões arquiteturais do `sentinel-auth
 | [0003](0003-rfc9457-error-format.md) | Formato de erro padronizado via RFC 9457 | Accepted |
 | [0004](0004-bean-validation-input.md) | Validação de entrada via Bean Validation | Accepted |
 | [0005](0005-defer-rate-limiting.md) | Rate limiting adiado para a fase de Quality & Security | Accepted |
+| [0006](0006-manual-roadmap-sync-automation.md) | Automação de sincronização do roadmap manual e aprovada por humano | Accepted |
