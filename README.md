@@ -4,7 +4,7 @@ Production-inspired authentication API with Spring Boot, JWT, Refresh Tokens, RB
 ## Roadmap
 
 - [ ] v0.1.0 — Project Bootstrap
-  - [ ] Phase 0 — Scope and architecture
+  - [x] Phase 0 — Scope and architecture
   - [ ] Phase 1 — Spring Boot foundation
 
 - [ ] v0.2.0 — User Persistence
