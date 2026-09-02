@@ -14,3 +14,7 @@ Production-inspired authentication API with Spring Boot, JWT, Refresh Tokens, RB
 - [ ] v1.0.0 — Stable Authentication API
 - [ ] v2.0.0 — OAuth2/OIDC
 - [ ] v3.0.0 — AWS Cognito Integration
+
+## License
+
+[MIT](LICENSE)
