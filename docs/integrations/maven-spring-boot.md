@@ -21,5 +21,5 @@
 ## Cuidados e anti-patterns específicos dessa combinação
 
 - **Não declarar `<version>` manualmente em dependências geridas pelo BOM** — isso destrava a combinação de versões testada pelo time do Spring Boot e pode gerar incompatibilidade silenciosa entre módulos Spring.
-- **Não esquecer que dependências fora do BOM do Spring Boot** (como os artefatos do `jjwt` — ver [`spring-boot-jjwt.md`](spring-boot-jjwt.md)) **precisam de `<version>` explícita** — o parent não as gerencia.
+- **Não esquecer que dependências fora do BOM do Spring Boot** (como os artefatos do `jjwt` — ver [`jjwt-spring-boot.md`](jjwt-spring-boot.md)) **precisam de `<version>` explícita** — o parent não as gerencia.
 - **Divergência entre a versão de Java local (usada pelo dev) e a usada em CI/imagem Docker** é a causa mais comum de "funciona na minha máquina": fixar a mesma baseline (Java 25) em `<java.version>`, no workflow do GitHub Actions (`setup-java`) e na imagem base do `Dockerfile` evita esse tipo de divergência.

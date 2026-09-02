@@ -18,10 +18,10 @@ Ponto de entrada para a base de referência técnica sincronizada em `docs/techn
 
 | Documento | Combinação |
 |---|---|
-| [`spring-boot-argon2id.md`](integrations/spring-boot-argon2id.md) | Bean `PasswordEncoder` e fluxo `register`/`login` |
-| [`spring-boot-jjwt.md`](integrations/spring-boot-jjwt.md) | Filtro de segurança customizado + emissão/validação de token |
-| [`spring-boot-flyway.md`](integrations/spring-boot-flyway.md) | Autoconfiguração e ordem de execução das migrações no startup |
-| [`spring-boot-maven.md`](integrations/spring-boot-maven.md) | Parent POM, BOM de dependências e empacotamento em JAR executável |
+| [`argon2id-spring-boot.md`](integrations/argon2id-spring-boot.md) | Bean `PasswordEncoder` e fluxo `register`/`login` |
+| [`jjwt-spring-boot.md`](integrations/jjwt-spring-boot.md) | Filtro de segurança customizado + emissão/validação de token |
+| [`flyway-spring-boot.md`](integrations/flyway-spring-boot.md) | Autoconfiguração e ordem de execução das migrações no startup |
+| [`maven-spring-boot.md`](integrations/maven-spring-boot.md) | Parent POM, BOM de dependências e empacotamento em JAR executável |
 
 ## Pendências conhecidas (não cobertas ainda)
 

@@ -73,7 +73,7 @@ Esqueleto ilustrativo de `pom.xml` (referência para a Phase 1 — este arquivo 
 
 ## Integrações relacionadas
 
-- [`spring-boot-maven.md`](../integrations/spring-boot-maven.md) — como o parent POM e o plugin de repackaging se encaixam no ciclo de build do Spring Boot.
+- [`maven-spring-boot.md`](../integrations/maven-spring-boot.md) — como o parent POM e o plugin de repackaging se encaixam no ciclo de build do Spring Boot.
 
 ## Proveniência
 

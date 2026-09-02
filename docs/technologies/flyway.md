@@ -57,7 +57,7 @@ Dependências Maven necessárias (a confirmar/pinar na Phase 1):
 
 ## Integrações relacionadas
 
-- [`spring-boot-flyway.md`](../integrations/spring-boot-flyway.md) — autoconfiguração e ordem de execução no startup.
+- [`flyway-spring-boot.md`](../integrations/flyway-spring-boot.md) — autoconfiguração e ordem de execução no startup.
 
 ## Proveniência
 

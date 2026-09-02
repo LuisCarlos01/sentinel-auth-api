@@ -22,7 +22,7 @@ Confirmado via Context7: existe uma tag real `v4.1.0` para `spring-projects/spri
 - **Jakarta Bean Validation** (`spring-boot-starter-validation`) em DTOs de entrada — ver [ADR-0004](../adr/0004-bean-validation-input.md).
 - **Versionamento de rota via prefixo `/api/v1`** em todos os `@RequestMapping`/`@RestController` — ver [ADR-0002](../adr/0002-uri-based-api-versioning.md).
 - **Actuator habilitado desde a v0.1.0** (`spring-boot-starter-actuator`) para observabilidade básica, conforme `docs/architecture.md`.
-- **Autenticação stateless** — sem `HttpSession` para autenticação; o estado de sessão é substituído pelo par access/refresh token (ver [`docs/technologies/jjwt.md`](jjwt.md) e [`docs/integrations/spring-boot-jjwt.md`](../integrations/spring-boot-jjwt.md)).
+- **Autenticação stateless** — sem `HttpSession` para autenticação; o estado de sessão é substituído pelo par access/refresh token (ver [`docs/technologies/jjwt.md`](jjwt.md) e [`docs/integrations/jjwt-spring-boot.md`](../integrations/jjwt-spring-boot.md)).
 
 ## Anti-patterns
 
@@ -57,10 +57,10 @@ class AuthController {
 
 ## Integrações relacionadas
 
-- [`spring-boot-argon2id.md`](../integrations/spring-boot-argon2id.md) — encoding de senha via Spring Security Crypto.
-- [`spring-boot-jjwt.md`](../integrations/spring-boot-jjwt.md) — emissão/validação de JWT no filtro de segurança.
-- [`spring-boot-flyway.md`](../integrations/spring-boot-flyway.md) — migrações automáticas no startup.
-- [`spring-boot-maven.md`](../integrations/spring-boot-maven.md) — empacotamento e gestão de dependências.
+- [`argon2id-spring-boot.md`](../integrations/argon2id-spring-boot.md) — encoding de senha via Spring Security Crypto.
+- [`jjwt-spring-boot.md`](../integrations/jjwt-spring-boot.md) — emissão/validação de JWT no filtro de segurança.
+- [`flyway-spring-boot.md`](../integrations/flyway-spring-boot.md) — migrações automáticas no startup.
+- [`maven-spring-boot.md`](../integrations/maven-spring-boot.md) — empacotamento e gestão de dependências.
 
 ## Proveniência
 

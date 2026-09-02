@@ -62,7 +62,7 @@ class AuthService {
 
 ## Integrações relacionadas
 
-- [`spring-boot-argon2id.md`](../integrations/spring-boot-argon2id.md) — como o bean é registrado e consumido dentro do Spring Security.
+- [`argon2id-spring-boot.md`](../integrations/argon2id-spring-boot.md) — como o bean é registrado e consumido dentro do Spring Security.
 
 ## Proveniência
 

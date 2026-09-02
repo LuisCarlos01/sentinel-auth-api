@@ -92,7 +92,7 @@ Dependências Maven (a confirmar/pinar na Phase 1):
 
 ## Integrações relacionadas
 
-- [`spring-boot-jjwt.md`](../integrations/spring-boot-jjwt.md) — como o jjwt se encaixa no filtro de segurança do Spring Security e na conversão de erros para RFC 9457.
+- [`jjwt-spring-boot.md`](../integrations/jjwt-spring-boot.md) — como o jjwt se encaixa no filtro de segurança do Spring Security e na conversão de erros para RFC 9457.
 
 ## Proveniência
 
