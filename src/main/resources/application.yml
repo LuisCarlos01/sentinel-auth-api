@@ -1,0 +1,18 @@
+spring:
+  application:
+    name: sentinel-auth-api
+  datasource:
+    url: ${DB_URL:jdbc:postgresql://localhost:5432/sentinel_auth}
+    username: ${DB_USER:sentinel}
+    password: ${DB_PASSWORD:sentinel}
+  jpa:
+    hibernate:
+      ddl-auto: validate
+  flyway:
+    enabled: true
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info

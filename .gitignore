@@ -3,3 +3,7 @@
 
 # Claude Code handoff docs (local, not shared)
 .claude/handoffs/
+
+# Maven
+target/
+*.class
