@@ -1,0 +1,5 @@
+# Intellij
+.idea/
+
+# Claude Code handoff docs (local, not shared)
+.claude/handoffs/
