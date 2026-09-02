@@ -1,4 +1,4 @@
-# 0005 — Rate limiting adiado deliberadamente para a fase de Quality
+# 0005 — Rate limiting adiado deliberadamente para a fase de Quality & Security
 
 ## Status
 

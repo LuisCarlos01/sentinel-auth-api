@@ -115,4 +115,4 @@ A API em si é agnóstica de canal, mas os clientes tratam os tokens de forma di
 - [ADR-0002 — Versionamento de API via URI desde o início](adr/0002-uri-based-api-versioning.md)
 - [ADR-0003 — Formato de erro padronizado via RFC 9457](adr/0003-rfc9457-error-format.md)
 - [ADR-0004 — Validação de entrada via Bean Validation](adr/0004-bean-validation-input.md)
-- [ADR-0005 — Rate limiting adiado deliberadamente para a fase de Quality](adr/0005-defer-rate-limiting.md)
+- [ADR-0005 — Rate limiting adiado deliberadamente para a fase de Quality & Security](adr/0005-defer-rate-limiting.md)

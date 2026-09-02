@@ -17,4 +17,4 @@ Este diretório reúne os registros de decisões arquiteturais do `sentinel-auth
 | [0002](0002-uri-based-api-versioning.md) | Versionamento de API via URI desde o início | Accepted |
 | [0003](0003-rfc9457-error-format.md) | Formato de erro padronizado via RFC 9457 | Accepted |
 | [0004](0004-bean-validation-input.md) | Validação de entrada via Bean Validation | Accepted |
-| [0005](0005-defer-rate-limiting.md) | Rate limiting adiado para a fase de Quality | Accepted |
+| [0005](0005-defer-rate-limiting.md) | Rate limiting adiado para a fase de Quality & Security | Accepted |
