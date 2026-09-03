@@ -20,6 +20,8 @@ Pré-requisito: Docker e Docker Compose instalados (não é necessário Java/Mav
 
    O Docker Compose já tem defaults funcionais para as variáveis de ambiente. Se quiser customizá-las, copie `.env.example` para `.env` (`cp .env.example .env`) e ajuste os valores.
 
+   As migrations Flyway (schema `users`, entre outras) rodam automaticamente na inicialização da aplicação — não é necessário nenhum comando manual.
+
 3. Acesse:
    - API: `http://localhost:8080`
    - Health check: `http://localhost:8080/actuator/health`
@@ -37,7 +39,7 @@ Pré-requisito: Docker e Docker Compose instalados (não é necessário Java/Mav
   - [x] Phase 0 — Scope and architecture
   - [x] Phase 1 — Spring Boot foundation
 
-- [ ] v0.2.0 — User Persistence
+- [x] v0.2.0 — User Persistence
 - [ ] v0.3.0 — Authentication Core
 - [ ] v0.4.0 — Authorization & Token Lifecycle
 - [ ] v0.5.0 — Quality & Security
