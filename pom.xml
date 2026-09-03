@@ -51,6 +51,25 @@
             <scope>runtime</scope>
         </dependency>
 
+        <!-- Argon2PasswordEncoder (spring-security-crypto) delega a implementação do Argon2id
+             para o BouncyCastle em tempo de execução; sem essa dependência, encode()/matches()
+             lançam NoClassDefFoundError assim que são chamados, mesmo com o bean configurado
+             com sucesso. Não é gerenciada pelo BOM do Spring Boot, por isso a versão é fixada
+             manualmente. -->
+        <dependency>
+            <groupId>org.bouncycastle</groupId>
+            <artifactId>bcprov-jdk18on</artifactId>
+            <version>1.80</version>
+            <scope>runtime</scope>
+        </dependency>
+
+        <!-- Spring Boot 4 dividiu a autoconfiguração em módulos por tecnologia: sem
+             spring-boot-flyway, a autoconfiguração do Flyway não é sequer considerada,
+             mesmo com flyway-core no classpath. -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-flyway</artifactId>
+        </dependency>
         <dependency>
             <groupId>org.flywaydb</groupId>
             <artifactId>flyway-core</artifactId>
