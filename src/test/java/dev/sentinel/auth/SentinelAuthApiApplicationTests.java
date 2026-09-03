@@ -33,6 +33,9 @@ class SentinelAuthApiApplicationTests {
     @Autowired
     private ApplicationContext applicationContext;
 
+    @Autowired
+    private PasswordEncoder passwordEncoder;
+
     @Test
     void contextLoads() {
         // apenas valida que o contexto Spring sobe com um Postgres real via Testcontainers
@@ -43,5 +46,22 @@ class SentinelAuthApiApplicationTests {
         Map<String, PasswordEncoder> passwordEncoderBeans = applicationContext.getBeansOfType(PasswordEncoder.class);
 
         assertThat(passwordEncoderBeans).hasSize(1);
+    }
+
+    @Test
+    void passwordEncoderBeanEncodesAndVerifiesPasswordEndToEnd() {
+        // Exercita o PasswordEncoder real, injetado pelo Spring, chamando encode()/matches().
+        // Se org.bouncycastle:bcprov-jdk18on for removido do classpath de runtime, o
+        // Argon2PasswordEncoder gerenciado pelo Spring falha aqui com NoClassDefFoundError,
+        // mesmo que o contexto suba normalmente (ver contextLoads()).
+        String rawPassword = "Str0ngP@ssw0rd!";
+        String wrongPassword = "SomeOtherPassword1!";
+
+        String hash = passwordEncoder.encode(rawPassword);
+
+        assertThat(hash).isNotBlank();
+        assertThat(hash).isNotEqualTo(rawPassword);
+        assertThat(passwordEncoder.matches(rawPassword, hash)).isTrue();
+        assertThat(passwordEncoder.matches(wrongPassword, hash)).isFalse();
     }
 }
