@@ -1,6 +1,9 @@
 # Intellij
 .idea/
 
+# Serena MCP cache
+.serena/
+
 # Claude Code handoff docs (local, not shared)
 .claude/handoffs/
 
