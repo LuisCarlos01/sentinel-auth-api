@@ -14,7 +14,8 @@
 
 ## Configuração necessária
 
-- Dependência: `spring-boot-starter-security` (traz `spring-security-crypto` transitivamente) — nenhuma dependência adicional além dela.
+- Dependência: `spring-boot-starter-security` (traz `spring-security-crypto` transitivamente) — necessária para o contrato `PasswordEncoder` e a classe `Argon2PasswordEncoder`.
+- Dependência adicional obrigatória: `org.bouncycastle:bcprov-jdk18on` (escopo `runtime`) — `Argon2PasswordEncoder` delega a implementação do algoritmo Argon2id ao BouncyCastle em tempo de execução. Sem essa dependência, o bean sobe normalmente no contexto Spring, mas `encode()`/`matches()` falha com `NoClassDefFoundError: org/bouncycastle/crypto/params/Argon2Parameters$Builder` assim que é chamado.
 - Um único `@Bean PasswordEncoder` no contexto Spring — se mais de um bean `PasswordEncoder` for declarado sem qualificador, o Spring falha a injeção por ambiguidade.
 - Nenhuma configuração de propriedade (`application.yml`) é necessária — os parâmetros de custo do Argon2id são definidos em código, na criação do encoder.
 
