@@ -6,6 +6,9 @@
 
 # Claude Code handoff docs (local, not shared)
 .claude/handoffs/
+.agents/
+.claude/skills/
+skills-lock.json
 
 # Maven
 target/
