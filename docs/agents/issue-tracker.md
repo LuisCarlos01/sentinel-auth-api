@@ -31,4 +31,6 @@ Used by `/wayfinder`. The **map** is a file with one **child** file per ticket.
 
 ## Relação com o roadmap público (GitHub Issues/Milestones)
 
-Este tracker local é para tickets de implementação por feature, dentro de uma fase. Fases macro do roadmap (`README.md`) continuam sincronizadas com GitHub Issues/Milestones via `/sync-roadmap` — os dois sistemas são desacoplados por decisão consciente (ver conversa registrada em `docs/adr/` se isso virar ADR no futuro). Não crie vínculo automático entre os dois sem decisão explícita do usuário.
+Este tracker local é para tickets de implementação por feature, dentro de uma fase. Fases macro do roadmap (`README.md`) continuam sincronizadas com GitHub Issues/Milestones via `/sync-roadmap`. Os dois sistemas **não têm vínculo automático** — nenhum skill ou fluxo cria issues no GitHub a partir de `.scratch/` por conta própria.
+
+Publicar uma spec/tickets também como (sub-)issues no GitHub é permitido, mas **só por decisão explícita do usuário a cada vez**, caso a caso — não é o padrão, e não substitui os arquivos em `.scratch/` (os dois passam a coexistir). Precedente: a spec `auth-register` (v0.3.0 — Authentication Core) foi publicada como sub-issues de `#4` a pedido direto do usuário, mantendo os arquivos locais como fonte primária.
