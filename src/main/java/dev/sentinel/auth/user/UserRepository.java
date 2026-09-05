@@ -15,4 +15,8 @@ public interface UserRepository extends JpaRepository<User, UUID> {
     // à normalização feita na escrita (não depende apenas dela).
     @Query("SELECT u FROM User u WHERE LOWER(u.email) = LOWER(:email)")
     Optional<User> findByEmail(@Param("email") String email);
+
+    // Espelha o índice funcional case-insensitive users_email_unique_idx.
+    @Query("SELECT COUNT(u) > 0 FROM User u WHERE LOWER(u.email) = LOWER(:email)")
+    boolean existsByEmail(@Param("email") String email);
 }
