@@ -109,6 +109,14 @@
             <artifactId>spring-boot-starter-test</artifactId>
             <scope>test</scope>
         </dependency>
+        <!-- Spring Boot 4 quebrou o antigo spring-boot-test-autoconfigure monolítico em módulos por
+             slice de teste; @WebMvcTest/@AutoConfigureMockMvc agora vivem aqui, não mais em
+             spring-boot-starter-test transitivamente. -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-webmvc-test</artifactId>
+            <scope>test</scope>
+        </dependency>
         <dependency>
             <groupId>org.springframework.security</groupId>
             <artifactId>spring-security-test</artifactId>

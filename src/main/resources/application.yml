@@ -6,6 +6,7 @@ spring:
     username: ${DB_USER:sentinel}
     password: ${DB_PASSWORD:sentinel}
   jpa:
+    open-in-view: false
     hibernate:
       ddl-auto: validate
   flyway:
