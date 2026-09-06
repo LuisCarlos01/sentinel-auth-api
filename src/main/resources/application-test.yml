@@ -1,3 +1,9 @@
+sentinel:
+  jwt:
+    # Chave fixa só para os testes automatizados — nunca usada em produção
+    # (production usa JWT_SIGNING_KEY via variável de ambiente, ver application.yml).
+    signing-key: test-only-signing-key-not-used-in-production-1234567890
+
 logging:
   level:
     org.testcontainers: WARN

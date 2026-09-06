@@ -1,6 +1,7 @@
 package dev.sentinel.auth.common.web;
 
 import dev.sentinel.auth.auth.EmailAlreadyRegisteredException;
+import dev.sentinel.auth.auth.InvalidCredentialsException;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -23,6 +24,13 @@ public class GlobalExceptionHandler {
     public ProblemDetail handleEmailAlreadyRegistered(EmailAlreadyRegisteredException ex) {
         ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(HttpStatus.CONFLICT, ex.getMessage());
         problemDetail.setTitle("Email already registered");
+        return problemDetail;
+    }
+
+    @ExceptionHandler(InvalidCredentialsException.class)
+    public ProblemDetail handleInvalidCredentials(InvalidCredentialsException ex) {
+        ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(HttpStatus.UNAUTHORIZED, ex.getMessage());
+        problemDetail.setTitle("Invalid credentials");
         return problemDetail;
     }
 

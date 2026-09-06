@@ -12,6 +12,14 @@ spring:
   flyway:
     enabled: true
 
+sentinel:
+  jwt:
+    # Chave de assinatura HS256 do Access token — sempre via variável de ambiente,
+    # nunca hardcoded nem commitada (ver .env.example para o default de desenvolvimento).
+    signing-key: ${JWT_SIGNING_KEY}
+    access-token-ttl-minutes: 15
+    refresh-token-ttl-days: 7
+
 management:
   endpoints:
     web:

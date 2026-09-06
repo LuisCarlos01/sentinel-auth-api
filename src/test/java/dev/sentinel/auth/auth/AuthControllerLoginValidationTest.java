@@ -13,9 +13,11 @@ import org.testcontainers.postgresql.PostgreSQLContainer;
 
 /**
  * Teste de integração ponta a ponta cobrindo a validação de entrada (400 RFC 9457) de
- * {@code POST /api/v1/auth/register}. Ver {@link AbstractAuthIntegrationTest} para o setup comum.
+ * {@code POST /api/v1/auth/login} (ticket 03). Reaproveita o handler de
+ * {@code MethodArgumentNotValidException} já existente desde o {@code register}. Ver
+ * {@link AbstractAuthIntegrationTest} para o setup comum.
  */
-class AuthControllerRegisterValidationTest extends AbstractAuthIntegrationTest {
+class AuthControllerLoginValidationTest extends AbstractAuthIntegrationTest {
 
     @Container
     static final PostgreSQLContainer POSTGRES = new PostgreSQLContainer("postgres:17-alpine");
@@ -29,9 +31,9 @@ class AuthControllerRegisterValidationTest extends AbstractAuthIntegrationTest {
 
     @Test
     void rejectsMissingEmail() throws Exception {
-        RegisterRequest request = new RegisterRequest(null, "Str0ngP@ssw0rd!");
+        LoginRequest request = new LoginRequest(null, "Str0ngP@ssw0rd!");
 
-        mockMvc.perform(post("/api/v1/auth/register")
+        mockMvc.perform(post("/api/v1/auth/login")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(jsonMapper.writeValueAsString(request)))
                 .andExpect(status().isBadRequest())
@@ -42,9 +44,9 @@ class AuthControllerRegisterValidationTest extends AbstractAuthIntegrationTest {
 
     @Test
     void rejectsInvalidEmailFormat() throws Exception {
-        RegisterRequest request = new RegisterRequest("not-an-email", "Str0ngP@ssw0rd!");
+        LoginRequest request = new LoginRequest("not-an-email", "Str0ngP@ssw0rd!");
 
-        mockMvc.perform(post("/api/v1/auth/register")
+        mockMvc.perform(post("/api/v1/auth/login")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(jsonMapper.writeValueAsString(request)))
                 .andExpect(status().isBadRequest())
@@ -54,10 +56,10 @@ class AuthControllerRegisterValidationTest extends AbstractAuthIntegrationTest {
     }
 
     @Test
-    void rejectsShortPassword() throws Exception {
-        RegisterRequest request = new RegisterRequest("jane.doe@example.com", "short1");
+    void rejectsMissingPassword() throws Exception {
+        LoginRequest request = new LoginRequest("jane.doe@example.com", null);
 
-        mockMvc.perform(post("/api/v1/auth/register")
+        mockMvc.perform(post("/api/v1/auth/login")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(jsonMapper.writeValueAsString(request)))
                 .andExpect(status().isBadRequest())
@@ -68,9 +70,22 @@ class AuthControllerRegisterValidationTest extends AbstractAuthIntegrationTest {
 
     @Test
     void rejectsBlankPassword() throws Exception {
-        RegisterRequest request = new RegisterRequest("jane.doe@example.com", "   ");
+        LoginRequest request = new LoginRequest("jane.doe@example.com", "   ");
 
-        mockMvc.perform(post("/api/v1/auth/register")
+        mockMvc.perform(post("/api/v1/auth/login")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(jsonMapper.writeValueAsString(request)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.status").value(400))
+                .andExpect(jsonPath("$.title").value("Invalid request content"))
+                .andExpect(jsonPath("$.errors[?(@.field == 'password')]").exists());
+    }
+
+    @Test
+    void rejectsShortPassword() throws Exception {
+        LoginRequest request = new LoginRequest("jane.doe@example.com", "short1");
+
+        mockMvc.perform(post("/api/v1/auth/login")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(jsonMapper.writeValueAsString(request)))
                 .andExpect(status().isBadRequest())

@@ -4,29 +4,56 @@ import dev.sentinel.auth.rbac.Role;
 import dev.sentinel.auth.rbac.RoleRepository;
 import dev.sentinel.auth.user.User;
 import dev.sentinel.auth.user.UserRepository;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.security.SecureRandom;
+import java.time.Duration;
+import java.time.Instant;
+import java.util.Base64;
+import java.util.HexFormat;
+import java.util.Set;
+import java.util.stream.Collectors;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 /**
- * Orquestra o fluxo de autenticação. Acessa {@link UserRepository} e {@link RoleRepository}
- * diretamente — sem camada de serviço intermediária em {@code user}/{@code rbac}, seguindo as
- * camadas simples do projeto (Controller → Service → Repository).
+ * Orquestra o fluxo de autenticação. Acessa {@link UserRepository}, {@link RoleRepository} e
+ * {@link RefreshTokenRepository} diretamente — sem camada de serviço intermediária em
+ * {@code user}/{@code rbac}, seguindo as camadas simples do projeto (Controller → Service →
+ * Repository).
  */
 @Service
 public class AuthService {
 
     private static final String DEFAULT_ROLE = "USER";
 
+    // 32 bytes = 256 bits de entropia, codificados em Base64 URL-safe sem padding.
+    private static final int REFRESH_TOKEN_BYTE_LENGTH = 32;
+
     private final UserRepository userRepository;
     private final RoleRepository roleRepository;
+    private final RefreshTokenRepository refreshTokenRepository;
     private final PasswordEncoder passwordEncoder;
+    private final JwtService jwtService;
+    private final Duration refreshTokenTtl;
+    private final SecureRandom secureRandom = new SecureRandom();
 
-    public AuthService(UserRepository userRepository, RoleRepository roleRepository, PasswordEncoder passwordEncoder) {
+    public AuthService(
+            UserRepository userRepository,
+            RoleRepository roleRepository,
+            RefreshTokenRepository refreshTokenRepository,
+            PasswordEncoder passwordEncoder,
+            JwtService jwtService,
+            @Value("${sentinel.jwt.refresh-token-ttl-days}") long refreshTokenTtlDays) {
         this.userRepository = userRepository;
         this.roleRepository = roleRepository;
+        this.refreshTokenRepository = refreshTokenRepository;
         this.passwordEncoder = passwordEncoder;
+        this.jwtService = jwtService;
+        this.refreshTokenTtl = Duration.ofDays(refreshTokenTtlDays);
     }
 
     @Transactional
@@ -52,6 +79,54 @@ public class AuthService {
             // Rede de segurança contra a race condition de dois registros concorrentes
             // com o mesmo email — o check existsByEmail acima não é atômico.
             throw new EmailAlreadyRegisteredException();
+        }
+    }
+
+    @Transactional
+    public LoginResponse login(LoginRequest request) {
+        // Email inexistente, senha errada, conta locked ou desabilitada: todos resultam na mesma
+        // InvalidCredentialsException, sem distinção, para não vazar qual condição falhou (nem no
+        // código nem na resposta ao cliente).
+        User user = userRepository.findByEmail(request.email()).orElseThrow(InvalidCredentialsException::new);
+
+        if (user.isLocked() || !user.isEnabled()) {
+            throw new InvalidCredentialsException();
+        }
+
+        if (!passwordEncoder.matches(request.password(), user.getPasswordHash())) {
+            throw new InvalidCredentialsException();
+        }
+
+        Set<String> roleNames = user.getRoles().stream().map(Role::getName).collect(Collectors.toSet());
+        String accessToken = jwtService.generateAccessToken(user.getId(), roleNames);
+
+        String rawRefreshToken = generateOpaqueRefreshToken();
+        RefreshToken refreshToken =
+                new RefreshToken(user, hashRefreshToken(rawRefreshToken), Instant.now().plus(refreshTokenTtl));
+        refreshTokenRepository.save(refreshToken);
+
+        return new LoginResponse(
+                accessToken, rawRefreshToken, "Bearer", jwtService.getAccessTokenTtl().toSeconds());
+    }
+
+    // Valor opaco de alta entropia (não JWT — ADR-0008); o texto plano só existe aqui e na
+    // resposta ao cliente, nunca é persistido nem logado.
+    private String generateOpaqueRefreshToken() {
+        byte[] randomBytes = new byte[REFRESH_TOKEN_BYTE_LENGTH];
+        secureRandom.nextBytes(randomBytes);
+        return Base64.getUrlEncoder().withoutPadding().encodeToString(randomBytes);
+    }
+
+    // SHA-256 (não Argon2id): o refresh token já nasce de alta entropia, então o custo
+    // memory-hard do Argon2id não agrega segurança aqui, só penaliza performance (ADR-0008).
+    private String hashRefreshToken(String rawRefreshToken) {
+        try {
+            MessageDigest digest = MessageDigest.getInstance("SHA-256");
+            byte[] hash = digest.digest(rawRefreshToken.getBytes());
+            return HexFormat.of().formatHex(hash);
+        } catch (NoSuchAlgorithmException ex) {
+            // SHA-256 é garantido por todo provider JCE padrão da JVM — nunca deveria ocorrer.
+            throw new IllegalStateException("SHA-256 algorithm not available", ex);
         }
     }
 }

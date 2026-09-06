@@ -11,32 +11,17 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.http.MediaType;
-import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
-import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.transaction.annotation.Transactional;
 import org.testcontainers.junit.jupiter.Container;
-import org.testcontainers.junit.jupiter.Testcontainers;
 import org.testcontainers.postgresql.PostgreSQLContainer;
-import tools.jackson.databind.json.JsonMapper;
 
 /**
- * Teste de integração ponta a ponta cobrindo o registro de email duplicado
- * (case-insensitive) em {@code POST /api/v1/auth/register}, seguindo o mesmo padrão de
- * {@code AuthControllerRegisterTest}: contexto Spring real + PostgreSQL real via Testcontainers,
- * sem mockar nenhum colaborador interno.
+ * Teste de integração ponta a ponta cobrindo o registro de email duplicado (case-insensitive) em
+ * {@code POST /api/v1/auth/register}. Ver {@link AbstractAuthIntegrationTest} para o setup comum.
  */
-@SpringBootTest
-@AutoConfigureMockMvc
-@ActiveProfiles("test")
-@Testcontainers
-@Transactional
-class AuthControllerRegisterDuplicateEmailTest {
+class AuthControllerRegisterDuplicateEmailTest extends AbstractAuthIntegrationTest {
 
     @Container
     static final PostgreSQLContainer POSTGRES = new PostgreSQLContainer("postgres:17-alpine");
@@ -47,12 +32,6 @@ class AuthControllerRegisterDuplicateEmailTest {
         registry.add("spring.datasource.username", POSTGRES::getUsername);
         registry.add("spring.datasource.password", POSTGRES::getPassword);
     }
-
-    @Autowired
-    private MockMvc mockMvc;
-
-    @Autowired
-    private JsonMapper jsonMapper;
 
     @Test
     void rejectsSecondRegistrationWithSameEmail() throws Exception {
