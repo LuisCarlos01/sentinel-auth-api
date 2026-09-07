@@ -33,6 +33,15 @@ Pré-requisito: Docker e Docker Compose instalados (não é necessário Java/Mav
    mise exec -- ./mvnw test
    ```
 
+## Deployment
+
+Instância de demonstração pública (AWS EC2, deploy manual — ver [ADR-0011](docs/adr/0011-aws-ec2-manual-deploy.md) e o runbook em [`docs/deployment.md`](docs/deployment.md)):
+
+- API: `http://<pendente — atualizar após o deploy>`
+- Swagger UI: `http://<pendente>/swagger-ui.html`
+
+> Sem HTTPS/domínio próprio nesta primeira entrega (limitação conhecida e documentada em ADR-0011).
+
 ## Roadmap
 
 - [x] v0.1.0 — Project Bootstrap
@@ -42,7 +51,7 @@ Pré-requisito: Docker e Docker Compose instalados (não é necessário Java/Mav
 - [x] v0.2.0 — User Persistence
 - [x] v0.3.0 — Authentication Core
 - [x] v0.4.0 — Authorization & Token Lifecycle
-- [ ] v0.5.0 — Quality & Security
+- [x] v0.5.0 — Quality & Security
 - [ ] v1.0.0 — Stable Authentication API
 - [ ] v2.0.0 — OAuth2/OIDC
 - [ ] v3.0.0 — AWS Cognito Integration
