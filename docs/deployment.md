@@ -109,9 +109,26 @@ Um `login` bem-sucedido retorna `accessToken`/`refreshToken` — use o `refreshT
 - Atualize a seção "Deployment" do `README.md` com o IP público real.
 - Pare a instância (`EC2 → Stop instance`, não `Terminate`) quando não estiver testando ativamente — reduz o custo a quase zero fora dos períodos de uso (ADR-0011).
 
+## 8. Deploy automatizado (issue #23)
+
+Depois do primeiro deploy manual (passos 1–7 acima), deploys seguintes podem ser automatizados via GitHub Actions (`.github/workflows/deploy.yml`): a cada push em `main`, depois que o workflow `CI` passar, o `Deploy` conecta via SSH na instância e roda o mesmo `git pull && docker compose up --build -d` do passo 5 — sem registry de imagem (Docker Hub/ECR), a EC2 continua buildando a própria imagem (ADR-0011). Depois de subir, o workflow espera até 60s pelo `/actuator/health` responder — se não responder, o job falha e mostra os últimos logs do container, em vez de reportar sucesso com a aplicação travada.
+
+**Secrets necessários** (`Settings → Secrets and variables → Actions` do repositório no GitHub):
+
+| Secret | Valor |
+|---|---|
+| `DEPLOY_HOST` | IP público da instância (ex.: `18.117.253.110`) |
+| `DEPLOY_SSH_USER` | `ec2-user` |
+| `DEPLOY_SSH_KEY` | Conteúdo do `.pem` gerado no passo 1 (chave privada completa) |
+| `PROD_JWT_SIGNING_KEY` | O mesmo valor real de produção usado no `.env` da instância |
+| `PROD_POSTGRES_PASSWORD` | O mesmo valor real de produção usado no `.env` da instância |
+
+O workflow **reescreve o `.env` da instância a cada deploy** a partir desses secrets — não depende do `.env` manual criado no passo 3 continuar existindo por conta própria.
+
+O caminho manual (passos 1–7) continua funcionando normalmente como fallback — a automação só substitui a repetição dos passos 3 (parte do `.env`) e 5 a cada atualização, não o processo inteiro.
+
 ## Limitações conhecidas desta primeira entrega (ADR-0011)
 
 - **Sem HTTPS/domínio** — tráfego em texto plano, aceitável dado que o projeto não tem usuários reais.
 - **Sem alta disponibilidade** — instância única; reiniciar o host derruba a aplicação até subir de novo manualmente.
-- **Deploy manual** — cada atualização de código exige repetir os passos 3 e 5 via SSH, até a automação da issue #23 ser implementada.
 - **Custo não é zero para sempre** — ver ADR-0011 para o modelo de crédito da AWS e a estimativa de custo pós-crédito.
