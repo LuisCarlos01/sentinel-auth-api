@@ -62,7 +62,7 @@ Quer rodar sua própria instância na AWS em vez de só usar a de demonstração
 - [x] v0.3.0 — Authentication Core
 - [x] v0.4.0 — Authorization & Token Lifecycle
 - [x] v0.5.0 — Quality & Security
-- [ ] v1.0.0 — Stable Authentication API
+- [x] v1.0.0 — Stable Authentication API
 - [ ] v2.0.0 — OAuth2/OIDC
 - [ ] v3.0.0 — AWS Cognito Integration
 
