@@ -97,6 +97,31 @@ public class AuthService {
             throw new InvalidCredentialsException();
         }
 
+        return issueTokenPair(user);
+    }
+
+    @Transactional
+    public LoginResponse refresh(String rawRefreshToken) {
+        if (rawRefreshToken == null || rawRefreshToken.isBlank()) {
+            throw new InvalidRefreshTokenException();
+        }
+
+        // Não encontrado ou expirado: mesmo 401 genérico, sem distinguir a causa (spec do ciclo
+        // refresh/logout). Uma linha expirada não é limpa aqui — fora do escopo deste ciclo.
+        RefreshToken refreshToken = refreshTokenRepository
+                .findByTokenHash(hashRefreshToken(rawRefreshToken))
+                .filter(token -> token.getExpiresAt().isAfter(Instant.now()))
+                .orElseThrow(InvalidRefreshTokenException::new);
+
+        // Deleção antes de emitir o novo par: consumo de uso único (Rotação — ADR-0008).
+        refreshTokenRepository.delete(refreshToken);
+
+        return issueTokenPair(refreshToken.getUser());
+    }
+
+    // Compartilhado por login/refresh: emite o Access token (claims a partir das roles atuais do
+    // User) e um novo Refresh token opaco, persistindo seu hash SHA-256 (ADR-0008).
+    private LoginResponse issueTokenPair(User user) {
         Set<String> roleNames = user.getRoles().stream().map(Role::getName).collect(Collectors.toSet());
         String accessToken = jwtService.generateAccessToken(user.getId(), roleNames);
 

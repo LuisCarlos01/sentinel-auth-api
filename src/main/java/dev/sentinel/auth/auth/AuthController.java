@@ -29,4 +29,11 @@ public class AuthController {
         LoginResponse response = authService.login(request);
         return ResponseEntity.ok(response);
     }
+
+    @PostMapping("/refresh")
+    public ResponseEntity<LoginResponse> refresh(@RequestBody(required = false) RefreshRequest request) {
+        String rawRefreshToken = request != null ? request.refreshToken() : null;
+        LoginResponse response = authService.refresh(rawRefreshToken);
+        return ResponseEntity.ok(response);
+    }
 }

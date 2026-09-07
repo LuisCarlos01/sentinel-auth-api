@@ -2,6 +2,7 @@ package dev.sentinel.auth.common.web;
 
 import dev.sentinel.auth.auth.EmailAlreadyRegisteredException;
 import dev.sentinel.auth.auth.InvalidCredentialsException;
+import dev.sentinel.auth.auth.InvalidRefreshTokenException;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -31,6 +32,13 @@ public class GlobalExceptionHandler {
     public ProblemDetail handleInvalidCredentials(InvalidCredentialsException ex) {
         ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(HttpStatus.UNAUTHORIZED, ex.getMessage());
         problemDetail.setTitle("Invalid credentials");
+        return problemDetail;
+    }
+
+    @ExceptionHandler(InvalidRefreshTokenException.class)
+    public ProblemDetail handleInvalidRefreshToken(InvalidRefreshTokenException ex) {
+        ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(HttpStatus.UNAUTHORIZED, ex.getMessage());
+        problemDetail.setTitle("Invalid refresh token");
         return problemDetail;
     }
 
