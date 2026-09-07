@@ -21,14 +21,15 @@ import tools.jackson.databind.json.JsonMapper;
  * causou recriação inesperada do container em meio à suíte (duas portas diferentes na mesma
  * execução), quebrando o pool de conexões do Hikari. Cada classe mantém seu próprio container,
  * como antes; esta base só remove a duplicação das anotações e do wiring de {@code MockMvc}/
- * {@code JsonMapper}.
+ * {@code JsonMapper}. Pública: reaproveitada também por testes de outros domínios (ex.
+ * {@code user}) que precisam de um usuário real autenticado via HTTP.
  */
 @SpringBootTest
 @AutoConfigureMockMvc
 @ActiveProfiles("test")
 @Testcontainers
 @Transactional
-abstract class AbstractAuthIntegrationTest {
+public abstract class AbstractAuthIntegrationTest {
 
     @Autowired
     protected MockMvc mockMvc;
