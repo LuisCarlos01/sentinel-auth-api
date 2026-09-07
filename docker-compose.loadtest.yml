@@ -1,0 +1,17 @@
+# Overlay para o teste de carga (Gatling, ticket #21) — usar em conjunto com o
+# docker-compose.yml base:
+#
+#   docker compose -f docker-compose.yml -f docker-compose.loadtest.yml up
+#
+# Eleva o rate limit de login bem acima do valor de produção (ADR-0010). Os dois buckets do
+# LoginRateLimitFilter (IP e e-mail) compartilham a mesma capacidade configurável; como a
+# simulação varia e-mail por usuário virtual, só o bucket por IP seria um problema real — a
+# simulação roda inteira de uma única máquina, então todas as requisições saem do mesmo IP de
+# origem, e sem essa elevação a simulação mediria "limite de taxa atingido" em vez da
+# performance real do fluxo de autenticação. O comportamento do rate limiter em si já é
+# validado pelos testes de integração do ticket #01, não é o que este teste de carga mede.
+services:
+  app:
+    environment:
+      SENTINEL_RATE_LIMIT_LOGIN_CAPACITY: "100000"
+      SENTINEL_RATE_LIMIT_LOGIN_WINDOW_SECONDS: "60"

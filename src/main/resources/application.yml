@@ -24,9 +24,14 @@ sentinel:
     # expirada sobrevivendo um pouco mais no banco, sem risco de segurança (ADR-0008).
     refresh-token-cleanup-interval-ms: 86400000
   rate-limit:
-    # Rate limiting em login, por bucket (IP e e-mail) — ADR-0010.
-    login-capacity: 5
-    login-window-seconds: 60
+    # Rate limiting em login, por bucket (IP e e-mail, mesma capacidade para os dois) — ADR-0010.
+    # Configurável via env var para permitir um valor bem mais alto especificamente no teste de
+    # carga (Gatling, ticket #21/docker-compose.loadtest.yml) — o load test do fluxo de auth roda
+    # de uma única máquina, todas as requisições saem do mesmo IP de origem, então o bucket por
+    # IP (o de e-mail não é problema, já que a simulação varia e-mail por usuário virtual)
+    # derrubaria a simulação bem antes de medir a performance real do fluxo.
+    login-capacity: ${SENTINEL_RATE_LIMIT_LOGIN_CAPACITY:5}
+    login-window-seconds: ${SENTINEL_RATE_LIMIT_LOGIN_WINDOW_SECONDS:60}
 
 management:
   endpoints:

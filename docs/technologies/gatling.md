@@ -4,7 +4,8 @@
 
 **Gatling** é a ferramenta de teste de carga escolhida para a fase `v0.5.0 — Quality & Security` (issue-mãe #6), para o fluxo completo de autenticação (`register`/`login`/`refresh`/`logout`). Decisão tomada em sessão de grilling com o dono do projeto (ainda **não** registrada em ADR nem em `docs/architecture.md`): Gatling foi escolhido especificamente por **integrar nativamente ao ciclo de vida do Maven** (`mvn verify`, via `gatling-maven-plugin`), evitando depender de uma ferramenta externa ao ecossistema Java já estabelecido no projeto (Java 25, Maven, sem Node/JS em nenhuma outra parte da stack) — ao contrário de alternativas como k6 (JS) ou Artillery (Node).
 
-> **Pendência explícita**: não existe `pom.xml` com Gatling declarado ainda — nenhuma dependência/plugin de teste de carga foi adicionada ao projeto até o momento. A documentação do Context7 para este projeto não retornou um número de versão único e atual de forma confiável (as referências encontradas incluem uma versão de exemplo desatualizada, `3.9.5`, dentro de um guia de migração histórico) — **não fixar uma versão aqui por suposição**. Confirmar a versão estável mais recente de `gatling-charts-highcharts` e `gatling-maven-plugin` (devem ser a mesma versão, os dois artefatos são versionados em conjunto) diretamente em [https://mvnrepository.com/artifact/io.gatling/gatling-maven-plugin](https://mvnrepository.com/artifact/io.gatling/gatling-maven-plugin) ou no changelog oficial quando a implementação da v0.5.0 rodar.
+> **Pendência resolvida (implementação do ticket #21)**: o Context7 não retornara um número de versão único e confiável (apenas `3.9.5`, de um guia de migração histórico). Versões confirmadas diretamente no projeto de demonstração oficial do Gatling
+> ([`gatling/gatling-maven-plugin-demo-java`](https://github.com/gatling/gatling-maven-plugin-demo-java/blob/main/pom.xml), mantido por dependabot) e cruzadas com o Maven Central: `gatling-maven-plugin` **4.21.10** e `gatling-charts-highcharts` **3.15.1** — **não são a mesma versão**: o plugin, a partir da série `4.x`, tem seu próprio esquema de versionamento, independente da versão do Gatling core usada em tempo de execução (que vem transitivamente de `gatling-charts-highcharts`, declarada como dependência de teste do projeto, não do plugin).
 
 ## Quando usar
 
@@ -68,12 +69,13 @@ public class AuthFlowSimulation extends Simulation {
 }
 ```
 
-Dependência e plugin Maven (versão a confirmar/pinar na v0.5.0 — ver "Pendência explícita" acima):
+Dependência e plugin Maven, refletidos no `pom.xml` real (profile `load-test`, ticket #21):
 
 ```xml
 <dependency>
     <groupId>io.gatling.highcharts</groupId>
     <artifactId>gatling-charts-highcharts</artifactId>
+    <version>${gatling.version}</version> <!-- 3.15.1 -->
     <scope>test</scope>
 </dependency>
 ```
@@ -82,6 +84,7 @@ Dependência e plugin Maven (versão a confirmar/pinar na v0.5.0 — ver "Pendê
 <plugin>
     <groupId>io.gatling</groupId>
     <artifactId>gatling-maven-plugin</artifactId>
+    <version>${gatling-maven-plugin.version}</version> <!-- 4.21.10 -->
 </plugin>
 ```
 
@@ -91,7 +94,6 @@ Dependência e plugin Maven (versão a confirmar/pinar na v0.5.0 — ver "Pendê
 
 ## Proveniência
 
-- **Provedor**: Context7.
-- **Biblioteca**: `/gatling/gatling.io-doc`.
-- **Versão consultada**: documentação de referência geral (setup do plugin Maven, DSL de simulação, diretório de relatório `target/gatling/`) — **não** foi possível confirmar um número de versão estável atual único através das consultas feitas; a única versão numérica retornada (`3.9.5`) veio de um guia de migração histórico e não deve ser tratada como a versão atual recomendada.
-- **Data da consulta**: 2026-09-07.
+- **Provedor original (referência geral)**: Context7, biblioteca `/gatling/gatling.io-doc` — não retornou uma versão estável atual confiável (a única versão numérica, `3.9.5`, veio de um guia de migração histórico), por isso não foi usado para pinar a versão.
+- **Versões pinadas (`gatling-maven-plugin` 4.21.10, `gatling.version`/`gatling-charts-highcharts` 3.15.1)**: confirmadas no projeto de demonstração oficial do Gatling ([`gatling/gatling-maven-plugin-demo-java`](https://github.com/gatling/gatling-maven-plugin-demo-java/blob/main/pom.xml)) e cruzadas com `maven-metadata.xml` do Maven Central.
+- **Data da confirmação**: 2026-09-07 (implementação do ticket #21).
