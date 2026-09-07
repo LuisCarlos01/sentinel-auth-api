@@ -25,7 +25,7 @@ Pré-requisito: Docker e Docker Compose instalados (não é necessário Java/Mav
 3. Acesse:
    - API: `http://localhost:8080`
    - Health check: `http://localhost:8080/actuator/health`
-   - Swagger UI: `http://localhost:8080/swagger-ui.html` — endpoints de autenticação (`/api/v1/auth/register`, `/login`, `/refresh`, `/logout`)
+   - Swagger UI: `http://localhost:8080/swagger-ui.html` — endpoints de autenticação (`/api/v1/auth/register`, `/login`, `/refresh`, `/logout`) e `GET /api/v1/users` (restrito ao papel `ADMIN`)
 
 4. Para rodar os testes localmente (requer JDK 25 via `mise` e Docker rodando — os testes de integração sobem seu próprio Postgres via Testcontainers, sem precisar do `docker compose` completo):
 
@@ -41,7 +41,7 @@ Pré-requisito: Docker e Docker Compose instalados (não é necessário Java/Mav
 
 - [x] v0.2.0 — User Persistence
 - [x] v0.3.0 — Authentication Core
-- [ ] v0.4.0 — Authorization & Token Lifecycle
+- [x] v0.4.0 — Authorization & Token Lifecycle
 - [ ] v0.5.0 — Quality & Security
 - [ ] v1.0.0 — Stable Authentication API
 - [ ] v2.0.0 — OAuth2/OIDC
