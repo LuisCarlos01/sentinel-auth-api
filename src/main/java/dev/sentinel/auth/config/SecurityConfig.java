@@ -15,9 +15,13 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 import tools.jackson.databind.json.JsonMapper;
 
 /**
- * {@code /api/v1/auth/register}, {@code /login} e {@code /refresh} continuam públicos;
- * {@code /logout} (e qualquer rota futura) exige um Access token válido, verificado pelo
- * {@link JwtAuthenticationFilter}. {@code /api/v1/users} exige, além de autenticação, o papel
+ * {@code /api/v1/auth/register}, {@code /login} e {@code /refresh} continuam públicos, assim como
+ * o health check do Actuator ({@code /actuator/health}, {@code /actuator/info} — únicos expostos,
+ * ver {@code application.yml}) e o Swagger UI/OpenAPI (bug encontrado ao validar o deploy do
+ * v1.0.0, issue #22: sem essas duas exceções, ambos caíam no {@code anyRequest().authenticated()}
+ * e exigiam Access token, quebrando os itens 6/7 do PRD). {@code /logout} (e qualquer rota futura)
+ * exige um Access token válido, verificado pelo {@link JwtAuthenticationFilter}. {@code
+ * /api/v1/users} exige, além de autenticação, o papel
  * {@code ADMIN} — enforcement por rota (`hasRole`), não `@PreAuthorize`/method security, já que é
  * a única rota restrita por papel no projeto até agora. Falhas de autenticação e de autorização
  * são traduzidas para RFC 9457 por {@link RestAuthenticationEntryPoint} e
@@ -45,6 +49,10 @@ public class SecurityConfig {
         http.csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(authorize -> authorize
                         .requestMatchers("/api/v1/auth/register", "/api/v1/auth/login", "/api/v1/auth/refresh")
+                        .permitAll()
+                        .requestMatchers("/actuator/health", "/actuator/info")
+                        .permitAll()
+                        .requestMatchers("/swagger-ui.html", "/swagger-ui/**", "/v3/api-docs/**")
                         .permitAll()
                         .requestMatchers("/api/v1/users")
                         .hasRole("ADMIN")
