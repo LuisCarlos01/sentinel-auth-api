@@ -136,11 +136,11 @@ Emite um novo par de tokens a partir de um refresh token válido, invalidando o 
 }
 ```
 
-Para o canal web, o refresh token pode chegar via cookie `httpOnly` em vez do corpo, já que é assim que ele é armazenado no cliente web ([`docs/architecture.md` — Armazenamento por canal do cliente](architecture.md#armazenamento-por-canal-do-cliente)). O mecanismo exato de entrega por canal (corpo JSON para mobile, cookie para web, ou ambos aceitos) ainda não foi decidido — ver [Pontos em aberto](#pontos-em-aberto).
+O servidor aceita o refresh token vindo do corpo (mobile) **ou** de um cookie `httpOnly` (web) — o que estiver presente na requisição; se ambos vierem, o cookie tem precedência; se nenhum vier, é tratado como token inválido (mesmo `401` abaixo). Ver [ADR-0009](adr/0009-dual-channel-refresh-token-delivery.md).
 
 **Response de sucesso — `200 OK`**
 
-Mesmo formato do login — novo par de tokens:
+Mesmo formato do login — novo par de tokens, retornado tanto no corpo quanto via `Set-Cookie` ([ADR-0009](adr/0009-dual-channel-refresh-token-delivery.md)):
 
 ```json
 {
@@ -155,7 +155,7 @@ Mesmo formato do login — novo par de tokens:
 
 | Status | Cenário |
 |---|---|
-| `401` | Refresh token inválido, expirado ou já usado (rotação — ver [`docs/architecture.md` — Persistência e revogação](architecture.md#persistência-e-revogação)) |
+| `401` | Refresh token inválido, expirado, já usado, ou ausente do corpo e do cookie (rotação — ver [`docs/architecture.md` — Persistência e revogação](architecture.md#persistência-e-revogação)) |
 
 Exemplo (`401`):
 
@@ -187,11 +187,11 @@ Authorization: Bearer <accessToken>
 }
 ```
 
-O critério de aceite do PRD exige um "refresh token válido associado ao usuário autenticado" — por isso o request combina o access token (autenticação, via header) com o refresh token a revogar (corpo ou cookie, mesmo ponto em aberto do endpoint de refresh).
+O critério de aceite do PRD exige um "refresh token válido associado ao usuário autenticado" — por isso o request combina o access token (autenticação, via header) com o refresh token a revogar (corpo ou cookie, mesma regra de precedência do endpoint de refresh — [ADR-0009](adr/0009-dual-channel-refresh-token-delivery.md)).
 
 **Response de sucesso — `204 No Content`**
 
-Sem corpo — apenas confirmação via status code, já que não há dado relevante a devolver após a revogação.
+Sem corpo — apenas confirmação via status code, já que não há dado relevante a devolver após a revogação. A resposta também limpa o cookie do refresh token (`Set-Cookie` com `Max-Age=0`).
 
 **Erros possíveis**
 
@@ -216,7 +216,6 @@ Exemplo (`401`):
 Detalhes de contrato que **não têm decisão registrada** em `docs/architecture.md`, no PRD ou em nenhum ADR até o momento. Não foram decididos aqui — ficam sinalizados para serem resolvidos quando o código for de fato escrito, principalmente na fase `v0.3.0 — Authentication Core` do roadmap:
 
 - **Formato do refresh token** (JWT assinado com `jti` vs. token opaco/`UUID`) — já sinalizado como ponto em aberto em [`docs/technologies/jjwt.md`](technologies/jjwt.md#quando-usar).
-- **Mecanismo exato de entrega do refresh token por canal** nos endpoints `refresh`/`logout` — corpo JSON (mobile), cookie `httpOnly` (web), ou ambos aceitos pelo mesmo endpoint.
 - **Tipo exato do identificador (`id`) do usuário** — UUID (como no exemplo ilustrativo de [`docs/technologies/flyway.md`](technologies/flyway.md)) ou identificador numérico autoincrementado.
 - **URIs de `type` customizadas** para o catálogo de erros RFC 9457 (hoje `about:blank` em todos os exemplos, por ser o default do `ProblemDetail`).
 - **Formato exato do corpo de erro `400` de validação** (se inclui lista de violações por campo, via propriedade adicional do `ProblemDetail`, ou apenas o `detail` genérico).

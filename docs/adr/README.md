@@ -21,3 +21,4 @@ Este diretório reúne os registros de decisões arquiteturais do `sentinel-auth
 | [0006](0006-manual-roadmap-sync-automation.md) | Automação de sincronização do roadmap manual e aprovada por humano | Accepted |
 | [0007](0007-shared-error-handling-package.md) | Pacote técnico compartilhado para tratamento de erro RFC 9457 | Accepted |
 | [0008](0008-opaque-hashed-single-use-refresh-token.md) | Refresh token opaco, hasheado e de uso único | Accepted |
+| [0009](0009-dual-channel-refresh-token-delivery.md) | Entrega do refresh token por corpo JSON e cookie simultaneamente | Accepted |

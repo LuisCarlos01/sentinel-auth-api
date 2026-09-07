@@ -36,11 +36,9 @@ Ver [`docs/architecture.md` — Armazenamento por canal do cliente](architecture
 
 ### CSRF via cookie do refresh token
 
-**Mitigação**: o refresh token do cliente web fica em cookie `httpOnly`, `Secure`, `SameSite` (decisão já registrada). O atributo `SameSite` mitiga CSRF porque impede o navegador de enviar o cookie em requisições disparadas por um site de terceiro (ex.: um `<form>` ou `fetch` malicioso hospedado fora da origem da aplicação) — sem o cookie anexado, a requisição forjada não consegue autenticar a chamada a `refresh`/`logout` em nome da vítima.
+**Mitigação**: o refresh token do cliente web fica em cookie `httpOnly`, `Secure`, `SameSite=Strict` ([ADR-0009](adr/0009-dual-channel-refresh-token-delivery.md)). O atributo `SameSite` mitiga CSRF porque impede o navegador de enviar o cookie em requisições disparadas por um site de terceiro (ex.: um `<form>` ou `fetch` malicioso hospedado fora da origem da aplicação) — sem o cookie anexado, a requisição forjada não consegue autenticar a chamada a `refresh`/`logout` em nome da vítima. `Strict` (em vez de `Lax`) foi escolhido porque o projeto não tem nenhum fluxo legítimo de navegação top-level cross-site que dependeria do cookie ser enviado.
 
-**Ponto de atenção futuro**: o valor exato de `SameSite` (`Strict` vs. `Lax`) ainda não foi decidido — fica para quando a fase `v0.3.0 — Authentication Core` implementar o código real do fluxo de autenticação. Não antecipado aqui.
-
-Ver [`docs/architecture.md` — Armazenamento por canal do cliente](architecture.md#armazenamento-por-canal-do-cliente).
+Ver [`docs/architecture.md` — Armazenamento por canal do cliente](architecture.md#armazenamento-por-canal-do-cliente) e [ADR-0009](adr/0009-dual-channel-refresh-token-delivery.md).
 
 ### SQL Injection
 
