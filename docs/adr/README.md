@@ -23,3 +23,4 @@ Este diretório reúne os registros de decisões arquiteturais do `sentinel-auth
 | [0008](0008-opaque-hashed-single-use-refresh-token.md) | Refresh token opaco, hasheado e de uso único | Accepted |
 | [0009](0009-dual-channel-refresh-token-delivery.md) | Entrega do refresh token por corpo JSON e cookie simultaneamente | Accepted |
 | [0010](0010-in-memory-rate-limiting-on-login.md) | Rate limiting em memória no login, via Bucket4j | Accepted |
+| [0011](0011-aws-ec2-manual-deploy.md) | Deploy do v1.0.0 em EC2 (AWS), manual, sem RDS/HTTPS/domínio | Accepted |
