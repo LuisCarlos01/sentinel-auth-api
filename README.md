@@ -25,12 +25,12 @@ Pré-requisito: Docker e Docker Compose instalados (não é necessário Java/Mav
 3. Acesse:
    - API: `http://localhost:8080`
    - Health check: `http://localhost:8080/actuator/health`
-   - Swagger UI: `http://localhost:8080/swagger-ui.html` (ainda não há endpoints de negócio nesta fase — é só a fundação do projeto)
+   - Swagger UI: `http://localhost:8080/swagger-ui.html` — endpoints de autenticação (`/api/v1/auth/register`, `/login`, `/refresh`, `/logout`)
 
-4. Para rodar os testes sem precisar do `docker compose` completo (os testes de integração sobem seu próprio Postgres via Testcontainers):
+4. Para rodar os testes localmente (requer JDK 25 via `mise` e Docker rodando — os testes de integração sobem seu próprio Postgres via Testcontainers, sem precisar do `docker compose` completo):
 
    ```bash
-   ./mvnw test
+   mise exec -- ./mvnw test
    ```
 
 ## Roadmap
@@ -40,7 +40,7 @@ Pré-requisito: Docker e Docker Compose instalados (não é necessário Java/Mav
   - [x] Phase 1 — Spring Boot foundation
 
 - [x] v0.2.0 — User Persistence
-- [ ] v0.3.0 — Authentication Core
+- [x] v0.3.0 — Authentication Core
 - [ ] v0.4.0 — Authorization & Token Lifecycle
 - [ ] v0.5.0 — Quality & Security
 - [ ] v1.0.0 — Stable Authentication API
