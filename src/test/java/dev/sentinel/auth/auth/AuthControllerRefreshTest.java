@@ -137,17 +137,6 @@ class AuthControllerRefreshTest extends AbstractAuthIntegrationTest {
                 .content(jsonMapper.writeValueAsString(new RegisterRequest(email, password))));
     }
 
-    private LoginResponse registerAndLogin(String email, String password) throws Exception {
-        registerUser(email, password);
-        String responseBody = mockMvc.perform(post("/api/v1/auth/login")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(jsonMapper.writeValueAsString(new LoginRequest(email, password))))
-                .andReturn()
-                .getResponse()
-                .getContentAsString();
-        return jsonMapper.readValue(responseBody, LoginResponse.class);
-    }
-
     private static String sha256Hex(String value) throws Exception {
         MessageDigest digest = MessageDigest.getInstance("SHA-256");
         return HexFormat.of().formatHex(digest.digest(value.getBytes()));

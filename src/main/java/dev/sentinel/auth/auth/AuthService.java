@@ -56,6 +56,11 @@ public class AuthService {
         this.refreshTokenTtl = Duration.ofDays(refreshTokenTtlDays);
     }
 
+    /** TTL do Refresh token, usado por {@code AuthController} para o {@code Max-Age} do cookie (ADR-0009). */
+    public Duration getRefreshTokenTtl() {
+        return refreshTokenTtl;
+    }
+
     @Transactional
     public RegisterResponse register(RegisterRequest request) {
         // Caminho rápido do caso comum: evita ida ao banco para inserir e só então descobrir o conflito.

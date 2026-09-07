@@ -1,6 +1,8 @@
 package dev.sentinel.auth.auth;
 
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -27,13 +29,24 @@ public class AuthController {
     @PostMapping("/login")
     public ResponseEntity<LoginResponse> login(@Valid @RequestBody LoginRequest request) {
         LoginResponse response = authService.login(request);
-        return ResponseEntity.ok(response);
+        return withRefreshTokenCookie(response);
     }
 
     @PostMapping("/refresh")
-    public ResponseEntity<LoginResponse> refresh(@RequestBody(required = false) RefreshRequest request) {
-        String rawRefreshToken = request != null ? request.refreshToken() : null;
-        LoginResponse response = authService.refresh(rawRefreshToken);
-        return ResponseEntity.ok(response);
+    public ResponseEntity<LoginResponse> refresh(
+            @RequestBody(required = false) RefreshRequest request, HttpServletRequest httpRequest) {
+        String cookieToken = RefreshTokenCookie.readFrom(httpRequest);
+        String bodyToken = request != null ? request.refreshToken() : null;
+        LoginResponse response = authService.refresh(cookieToken != null ? cookieToken : bodyToken);
+        return withRefreshTokenCookie(response);
+    }
+
+    private ResponseEntity<LoginResponse> withRefreshTokenCookie(LoginResponse response) {
+        return ResponseEntity.ok()
+                .header(
+                        HttpHeaders.SET_COOKIE,
+                        RefreshTokenCookie.set(response.refreshToken(), authService.getRefreshTokenTtl())
+                                .toString())
+                .body(response);
     }
 }
