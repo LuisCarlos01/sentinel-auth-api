@@ -19,6 +19,10 @@ sentinel:
     signing-key: ${JWT_SIGNING_KEY}
     access-token-ttl-minutes: 15
     refresh-token-ttl-days: 7
+    # Frequência do job de limpeza de Refresh tokens expirados (RefreshTokenCleanupJob).
+    # 24h: baixa frequência é suficiente — a única consequência de um atraso é uma linha
+    # expirada sobrevivendo um pouco mais no banco, sem risco de segurança (ADR-0008).
+    refresh-token-cleanup-interval-ms: 86400000
 
 management:
   endpoints:
