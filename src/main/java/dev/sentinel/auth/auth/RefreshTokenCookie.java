@@ -27,6 +27,17 @@ final class RefreshTokenCookie {
                 .build();
     }
 
+    // Max-Age=0 instrui o navegador a descartar o cookie imediatamente (usado em logout).
+    static ResponseCookie clear() {
+        return ResponseCookie.from(NAME, "")
+                .httpOnly(true)
+                .secure(true)
+                .sameSite("Strict")
+                .path(PATH)
+                .maxAge(0)
+                .build();
+    }
+
     // Ausente = null: quem chama decide o fallback (corpo do request), não esta classe.
     static String readFrom(HttpServletRequest request) {
         Cookie[] cookies = request.getCookies();

@@ -12,6 +12,8 @@ import java.time.Instant;
 import java.util.Base64;
 import java.util.HexFormat;
 import java.util.Set;
+import java.util.UUID;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -107,21 +109,37 @@ public class AuthService {
 
     @Transactional
     public LoginResponse refresh(String rawRefreshToken) {
-        if (rawRefreshToken == null || rawRefreshToken.isBlank()) {
-            throw new InvalidRefreshTokenException();
-        }
-
-        // Não encontrado ou expirado: mesmo 401 genérico, sem distinguir a causa (spec do ciclo
-        // refresh/logout). Uma linha expirada não é limpa aqui — fora do escopo deste ciclo.
-        RefreshToken refreshToken = refreshTokenRepository
-                .findByTokenHash(hashRefreshToken(rawRefreshToken))
-                .filter(token -> token.getExpiresAt().isAfter(Instant.now()))
-                .orElseThrow(InvalidRefreshTokenException::new);
+        // Uma linha expirada não é limpa aqui — fora do escopo deste ciclo.
+        RefreshToken refreshToken = findRefreshTokenOrThrow(
+                rawRefreshToken, token -> token.getExpiresAt().isAfter(Instant.now()));
 
         // Deleção antes de emitir o novo par: consumo de uso único (Rotação — ADR-0008).
         refreshTokenRepository.delete(refreshToken);
 
         return issueTokenPair(refreshToken.getUser());
+    }
+
+    @Transactional
+    public void logout(UUID userId, String rawRefreshToken) {
+        // Não confirma nem nega a existência do token para um usuário que não é o dono dele —
+        // mesma exceção genérica de "não encontrado".
+        RefreshToken refreshToken =
+                findRefreshTokenOrThrow(rawRefreshToken, token -> token.getUser().getId().equals(userId));
+
+        refreshTokenRepository.delete(refreshToken);
+    }
+
+    // Compartilhado por refresh/logout: token ausente, não encontrado, ou reprovado por
+    // `constraint` (expiração em refresh, posse em logout) — mesmo 401 genérico em todos os
+    // casos, sem distinguir a causa (spec do ciclo refresh/logout).
+    private RefreshToken findRefreshTokenOrThrow(String rawRefreshToken, Predicate<RefreshToken> constraint) {
+        if (rawRefreshToken == null || rawRefreshToken.isBlank()) {
+            throw new InvalidRefreshTokenException();
+        }
+        return refreshTokenRepository
+                .findByTokenHash(hashRefreshToken(rawRefreshToken))
+                .filter(constraint)
+                .orElseThrow(InvalidRefreshTokenException::new);
     }
 
     // Compartilhado por login/refresh: emite o Access token (claims a partir das roles atuais do
