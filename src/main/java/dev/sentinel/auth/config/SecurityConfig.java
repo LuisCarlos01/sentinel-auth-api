@@ -2,8 +2,11 @@ package dev.sentinel.auth.config;
 
 import dev.sentinel.auth.auth.JwtAuthenticationFilter;
 import dev.sentinel.auth.auth.JwtService;
+import dev.sentinel.auth.auth.LoginRateLimitFilter;
 import dev.sentinel.auth.auth.RestAccessDeniedHandler;
 import dev.sentinel.auth.auth.RestAuthenticationEntryPoint;
+import java.time.Duration;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -18,7 +21,8 @@ import tools.jackson.databind.json.JsonMapper;
  * {@code ADMIN} — enforcement por rota (`hasRole`), não `@PreAuthorize`/method security, já que é
  * a única rota restrita por papel no projeto até agora. Falhas de autenticação e de autorização
  * são traduzidas para RFC 9457 por {@link RestAuthenticationEntryPoint} e
- * {@link RestAccessDeniedHandler}, respectivamente.
+ * {@link RestAccessDeniedHandler}, respectivamente. {@code /login} também passa pelo
+ * {@link LoginRateLimitFilter} (ADR-0010) antes de qualquer verificação de credenciais.
  *
  * <p>CSRF desabilitado: a API é stateless via JWT, sem sessão nem cookie de sessão do servidor
  * (ver docs/architecture.md) — a proteção CSRF do Spring Security existe para autenticação
@@ -28,8 +32,16 @@ import tools.jackson.databind.json.JsonMapper;
 public class SecurityConfig {
 
     @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http, JwtService jwtService, JsonMapper jsonMapper)
+    public SecurityFilterChain securityFilterChain(
+            HttpSecurity http,
+            JwtService jwtService,
+            JsonMapper jsonMapper,
+            @Value("${sentinel.rate-limit.login-capacity}") int loginRateLimitCapacity,
+            @Value("${sentinel.rate-limit.login-window-seconds}") long loginRateLimitWindowSeconds)
             throws Exception {
+        LoginRateLimitFilter loginRateLimitFilter = new LoginRateLimitFilter(
+                jsonMapper, loginRateLimitCapacity, Duration.ofSeconds(loginRateLimitWindowSeconds));
+
         http.csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(authorize -> authorize
                         .requestMatchers("/api/v1/auth/register", "/api/v1/auth/login", "/api/v1/auth/refresh")
@@ -41,7 +53,8 @@ public class SecurityConfig {
                 .exceptionHandling(exceptionHandling -> exceptionHandling
                         .authenticationEntryPoint(new RestAuthenticationEntryPoint(jsonMapper))
                         .accessDeniedHandler(new RestAccessDeniedHandler(jsonMapper)))
-                .addFilterBefore(new JwtAuthenticationFilter(jwtService), UsernamePasswordAuthenticationFilter.class);
+                .addFilterBefore(new JwtAuthenticationFilter(jwtService), UsernamePasswordAuthenticationFilter.class)
+                .addFilterBefore(loginRateLimitFilter, JwtAuthenticationFilter.class);
         return http.build();
     }
 }

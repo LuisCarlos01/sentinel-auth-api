@@ -23,6 +23,10 @@ sentinel:
     # 24h: baixa frequência é suficiente — a única consequência de um atraso é uma linha
     # expirada sobrevivendo um pouco mais no banco, sem risco de segurança (ADR-0008).
     refresh-token-cleanup-interval-ms: 86400000
+  rate-limit:
+    # Rate limiting em login, por bucket (IP e e-mail) — ADR-0010.
+    login-capacity: 5
+    login-window-seconds: 60
 
 management:
   endpoints:

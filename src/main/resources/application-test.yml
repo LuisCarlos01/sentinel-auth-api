@@ -3,6 +3,14 @@ sentinel:
     # Chave fixa só para os testes automatizados — nunca usada em produção
     # (production usa JWT_SIGNING_KEY via variável de ambiente, ver application.yml).
     signing-key: test-only-signing-key-not-used-in-production-1234567890
+  rate-limit:
+    # Capacidade generosa por padrão: várias classes de teste chamam login várias vezes numa
+    # mesma classe (mesmo contexto Spring => mesmo bucket, já que o MockMvc usa sempre o mesmo
+    # IP sintético por padrão) sem a intenção de testar rate limiting — só LoginRateLimitFilterTest
+    # sobrescreve estas duas propriedades para o valor real de produção (ADR-0010) via
+    # @DynamicPropertySource, para testar o limite de verdade.
+    login-capacity: 1000
+    login-window-seconds: 60
 
 logging:
   level:

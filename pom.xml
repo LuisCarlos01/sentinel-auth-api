@@ -21,6 +21,8 @@
         <java.version>25</java.version>
         <jjwt.version>0.13.0</jjwt.version>
         <springdoc.version>3.1.0</springdoc.version>
+        <bucket4j.version>8.14.0</bucket4j.version>
+        <caffeine.version>3.2.0</caffeine.version>
     </properties>
 
     <dependencies>
@@ -102,6 +104,22 @@
             <groupId>org.springdoc</groupId>
             <artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
             <version>${springdoc.version}</version>
+        </dependency>
+
+        <!-- Bucket4j: fora do BOM do Spring Boot, versão fixada manualmente (ADR-0010).
+             Só bucket4j_jdk17-core (Bucket local, sem ProxyManager distribuído — não usamos
+             o módulo bucket4j_jdk17-caffeine: seu ProxyManager existe para preparar troca
+             futura por um backend distribuído, que não é o cenário deste projeto — instância
+             única). Caffeine puro (Cache<String, Bucket>) já resolve a eviction automática. -->
+        <dependency>
+            <groupId>com.bucket4j</groupId>
+            <artifactId>bucket4j_jdk17-core</artifactId>
+            <version>${bucket4j.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.github.ben-manes.caffeine</groupId>
+            <artifactId>caffeine</artifactId>
+            <version>${caffeine.version}</version>
         </dependency>
 
         <dependency>
