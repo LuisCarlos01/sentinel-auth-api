@@ -1,6 +1,6 @@
 # Deploy — sentinel-auth-api
 
-Runbook do primeiro deploy do `v1.0.0` (issue #22), conforme decidido em [ADR-0011](adr/0011-aws-ec2-manual-deploy.md): AWS EC2, `t3.micro`, deploy **manual** (não automatizado — ver #23 para a automação futura via GitHub Actions), reaproveitando o `docker-compose.yml` do repositório sem nenhuma mudança de arquitetura.
+Runbook do primeiro deploy do `v1.0.0` (issue #22), conforme decidido em [ADR-0011](adr/0011-aws-ec2-manual-deploy.md): AWS EC2, `t3.micro`, primeiro deploy **manual**, reaproveitando o `docker-compose.yml` do repositório sem nenhuma mudança de arquitetura. Deploys seguintes já são automatizados via GitHub Actions (issue #23 — ver seção 8).
 
 Este documento é o passo a passo para **quem for executar o deploy manualmente** — não é uma automação, é literalmente a sequência de comandos/cliques a seguir.
 
