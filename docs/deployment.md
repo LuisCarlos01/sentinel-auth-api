@@ -35,16 +35,24 @@ sudo usermod -aG docker ec2-user
 # Disconecte e reconecte via SSH para o grupo `docker` ter efeito na sessão.
 ```
 
-Instale o plugin `docker compose` (Amazon Linux 2023 não traz por padrão):
+Instale os plugins `docker compose` e `docker buildx` (Amazon Linux 2023 não traz nenhum dos dois por padrão via `dnf`; o pacote `docker` do repositório só traz o Engine). `compose build`/`up --build` **exige buildx ≥ 0.17.0** — instalar só o compose e ficar com um buildx antigo (ou nenhum) falha com `compose build requires buildx 0.17.0 or later` (achado ao validar a automação da issue #23):
 
 ```bash
 DOCKER_CONFIG=${DOCKER_CONFIG:-$HOME/.docker}
 mkdir -p $DOCKER_CONFIG/cli-plugins
+
 curl -SL https://github.com/docker/compose/releases/latest/download/docker-compose-linux-x86_64 \
   -o $DOCKER_CONFIG/cli-plugins/docker-compose
 chmod +x $DOCKER_CONFIG/cli-plugins/docker-compose
 docker compose version
+
+curl -SL https://github.com/docker/buildx/releases/latest/download/buildx-v0.37.0.linux-amd64 \
+  -o $DOCKER_CONFIG/cli-plugins/docker-buildx
+chmod +x $DOCKER_CONFIG/cli-plugins/docker-buildx
+docker buildx version
 ```
+
+> A versão do `buildx` no comando acima (`v0.37.0`) é a mais recente confirmada em `github.com/docker/buildx/releases/latest` nesta edição do runbook — confirme se ainda é a atual antes de rodar, mesmo cuidado de não confiar cegamente numa versão fixada em documentação (mesmo racional já aplicado a outras dependências do projeto, ex. `docs/technologies/jacoco.md`/`gatling.md`).
 
 ## 3. Clonar o repositório e configurar o `.env`
 
