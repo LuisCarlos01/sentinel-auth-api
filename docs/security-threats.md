@@ -12,9 +12,7 @@ Ver [`docs/technologies/argon2id.md`](technologies/argon2id.md).
 
 ### Brute force / credential stuffing no login
 
-**Status**: risco aceito conscientemente até a fase `v0.5.0 — Quality & Security` do roadmap. Sem rate limiting, o endpoint `login` fica exposto a tentativas repetidas de credenciais entre a v0.1.0 e a v0.5.0 — decisão de sequenciamento já registrada, não reexplicada aqui.
-
-Ver [ADR-0005](adr/0005-defer-rate-limiting.md).
+**Mitigação desenhada, implementação pendente**: rate limiting em `login` via Bucket4j (em memória, chave combinada IP + e-mail, 5 tentativas/minuto por bucket) — decisão registrada em [ADR-0010](adr/0010-in-memory-rate-limiting-on-login.md), fechando o trade-off aceito em [ADR-0005](adr/0005-defer-rate-limiting.md). Até a implementação de fato rodar (fase `v0.5.0 — Quality & Security`), o risco permanece o mesmo já aceito conscientemente desde a v0.1.0.
 
 ### Enumeração de usuários
 

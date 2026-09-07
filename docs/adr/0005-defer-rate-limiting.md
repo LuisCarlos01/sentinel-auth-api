@@ -25,3 +25,7 @@ Rate limiting **não** entra na v0.1.0. É uma escolha consciente de sequenciame
 
 - Entre a v0.1.0 e a v0.5.0, os endpoints de autenticação (em especial `login`) ficam sem proteção própria da API contra brute force ou abuso — risco aceito conscientemente, dado que o projeto não tem usuários reais além do autor/estudo nesse período.
 - Esse trade-off é reavaliado e encerrado explicitamente na fase `v0.5.0 — Quality & Security` do roadmap.
+
+## Encerramento
+
+Trade-off fechado por [ADR-0010](0010-in-memory-rate-limiting-on-login.md): rate limiting em memória via Bucket4j, restrito a `login`. Esta seção é um adendo factual — o registro original acima permanece como estava, refletindo a decisão histórica correta no momento em que foi tomada.
