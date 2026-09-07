@@ -4,7 +4,7 @@
 
 **JaCoCo** (`jacoco-maven-plugin`) é a ferramenta de medição de cobertura de testes escolhida para a fase `v0.5.0 — Quality & Security` (issue-mãe #6). Decisão tomada em sessão de grilling com o dono do projeto (ainda **não** registrada em ADR nem em `docs/architecture.md`): JaCoCo foi escolhido por ser o **plugin Maven padrão do ecossistema Java** para medição de cobertura via instrumentação de bytecode — mesma lógica de "ferramenta nativa do ecossistema já estabelecido" usada para justificar Gatling (ver [`gatling.md`](gatling.md)).
 
-> **Pendência explícita**: não existe `pom.xml` com JaCoCo declarado ainda. A documentação consultada via Context7 não retornou um número de versão estável atual único e confiável (apenas trechos de changelog histórico, cobrindo até a era de suporte a Java 15/16/17). **Não fixar uma versão aqui por suposição** — confirmar a versão estável mais recente de `jacoco-maven-plugin` diretamente em [https://mvnrepository.com/artifact/org.jacoco/jacoco-maven-plugin](https://mvnrepository.com/artifact/org.jacoco/jacoco-maven-plugin) quando a implementação da v0.5.0 rodar, e validar compatibilidade com **Java 25** especificamente (bytecode de versões muito recentes do JDK historicamente exige uma versão do JaCoCo relativamente recente — checar release notes).
+> **Pendência resolvida (implementação do ticket #20)**: versão confirmada diretamente no changelog oficial (`jacoco.org/jacoco/trunk/doc/changes.html`), não pela sugestão do Context7 (que não retornara um número confiável). `jacoco-maven-plugin` **0.8.15** — suporte oficial ao bytecode do Java 25 desde a 0.8.14, e à 0.8.15 (a mais recente no momento) já suporta oficialmente Java 26.
 
 ## Quando usar
 
@@ -32,10 +32,11 @@ Decisão já tomada (não um ponto em aberto): medir cobertura de testes de todo
 ## Exemplo mínimo
 
 ```xml
-<!-- Referência — não existe ainda no repo. Versão a confirmar/pinar na v0.5.0. -->
+<!-- Refletido no pom.xml real (ticket #20) — versão 0.8.15, property jacoco.version. -->
 <plugin>
     <groupId>org.jacoco</groupId>
     <artifactId>jacoco-maven-plugin</artifactId>
+    <version>${jacoco.version}</version>
     <executions>
         <execution>
             <id>prepare-agent</id>
@@ -62,7 +63,6 @@ Decisão já tomada (não um ponto em aberto): medir cobertura de testes de todo
 
 ## Proveniência
 
-- **Provedor**: Context7.
-- **Biblioteca**: `/jacoco/jacoco`.
-- **Versão consultada**: documentação de referência geral do plugin Maven (`org.jacoco.doc/docroot/doc/maven.html`) e trechos de changelog histórico (`changes.html`, cobrindo até suporte a Java 15/16/17 em versões antigas do JaCoCo) — não fixa uma versão estável atual recomendada para o projeto.
-- **Data da consulta**: 2026-09-07.
+- **Provedor original (referência geral)**: Context7, biblioteca `/jacoco/jacoco` — não retornou uma versão estável atual confiável (só changelog histórico até Java 15/16/17), por isso não foi usado para pinar a versão.
+- **Versão pinada (`0.8.15`)**: confirmada diretamente em `maven-metadata.xml` do Maven Central (`repo1.maven.org/maven2/org/jacoco/jacoco-maven-plugin/`) e no changelog oficial (`jacoco.org/jacoco/trunk/doc/changes.html`) — suporte oficial a Java 25 desde a 0.8.14, a 0.8.15 (mais recente) já suporta oficialmente Java 26.
+- **Data da confirmação**: 2026-09-07 (implementação do ticket #20).

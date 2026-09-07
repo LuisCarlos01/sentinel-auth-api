@@ -23,6 +23,7 @@
         <springdoc.version>3.1.0</springdoc.version>
         <bucket4j.version>8.14.0</bucket4j.version>
         <caffeine.version>3.2.0</caffeine.version>
+        <jacoco.version>0.8.15</jacoco.version>
     </properties>
 
     <dependencies>
@@ -162,6 +163,33 @@
             <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
+            </plugin>
+
+            <!-- JaCoCo: fora do BOM do Spring Boot, versão fixada manualmente. 0.8.15 é a
+                 primeira a listar suporte oficial ao bytecode gerado pelo Java 26 e mantém o
+                 suporte oficial ao Java 25 (adicionado na 0.8.14) — confirmado no changelog
+                 oficial, não pela versão sugerida pelo Context7. Apenas medição/relatório:
+                 jacoco:check deliberadamente omitido, sem threshold de cobertura definido
+                 em nenhum documento do projeto (ver docs/technologies/jacoco.md). -->
+            <plugin>
+                <groupId>org.jacoco</groupId>
+                <artifactId>jacoco-maven-plugin</artifactId>
+                <version>${jacoco.version}</version>
+                <executions>
+                    <execution>
+                        <id>prepare-agent</id>
+                        <goals>
+                            <goal>prepare-agent</goal>
+                        </goals>
+                    </execution>
+                    <execution>
+                        <id>report</id>
+                        <phase>verify</phase>
+                        <goals>
+                            <goal>report</goal>
+                        </goals>
+                    </execution>
+                </executions>
             </plugin>
         </plugins>
     </build>

@@ -14,7 +14,7 @@
 
 ## Configuração necessária
 
-- Plugin `org.jacoco:jacoco-maven-plugin` declarado em `<build><plugins>` — versão a confirmar/pinar na v0.5.0 (ver [`jacoco.md`](../technologies/jacoco.md), pendência de versão e de compatibilidade com Java 25).
+- Plugin `org.jacoco:jacoco-maven-plugin` declarado em `<build><plugins>`, versão `0.8.15` (confirmada no changelog oficial, compatível com Java 25 — ver [`jacoco.md`](../technologies/jacoco.md)).
 - Duas execuções mínimas: `prepare-agent` (sem fase explícita necessária — o goal já se liga corretamente ao ciclo de vida por convenção do plugin) e `report` (fase `verify`, para que o relatório reflita o `mvn clean verify` completo, mesmo comando já usado para build completo no projeto).
 - Nenhuma configuração de `<rules>`/`<limits>` para `jacoco:check` — deliberadamente omitida (ver acima).
 
