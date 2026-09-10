@@ -6,12 +6,17 @@ import dev.sentinel.auth.auth.LoginRateLimitFilter;
 import dev.sentinel.auth.auth.RestAccessDeniedHandler;
 import dev.sentinel.auth.auth.RestAuthenticationEntryPoint;
 import java.time.Duration;
+import java.util.Arrays;
+import java.util.List;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.CorsConfigurationSource;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import tools.jackson.databind.json.JsonMapper;
 
 /**
@@ -31,6 +36,11 @@ import tools.jackson.databind.json.JsonMapper;
  * <p>CSRF desabilitado: a API é stateless via JWT, sem sessão nem cookie de sessão do servidor
  * (ver docs/architecture.md) — a proteção CSRF do Spring Security existe para autenticação
  * baseada em sessão/cookie, que este projeto não usa.
+ *
+ * <p>CORS habilitado com {@code allowCredentials=true} porque o Refresh token viaja num cookie
+ * {@code httpOnly} (ver {@link dev.sentinel.auth.auth.RefreshTokenCookie}), não só no corpo —
+ * sem isso o navegador descarta o cookie de resposta em requisições cross-origin. Por isso as
+ * origens permitidas ({@code sentinel.cors.allowed-origins}) não podem incluir wildcard.
  */
 @Configuration
 public class SecurityConfig {
@@ -40,6 +50,7 @@ public class SecurityConfig {
             HttpSecurity http,
             JwtService jwtService,
             JsonMapper jsonMapper,
+            CorsConfigurationSource corsConfigurationSource,
             @Value("${sentinel.rate-limit.login-capacity}") int loginRateLimitCapacity,
             @Value("${sentinel.rate-limit.login-window-seconds}") long loginRateLimitWindowSeconds)
             throws Exception {
@@ -47,6 +58,7 @@ public class SecurityConfig {
                 jsonMapper, loginRateLimitCapacity, Duration.ofSeconds(loginRateLimitWindowSeconds));
 
         http.csrf(csrf -> csrf.disable())
+                .cors(cors -> cors.configurationSource(corsConfigurationSource))
                 .authorizeHttpRequests(authorize -> authorize
                         .requestMatchers("/api/v1/auth/register", "/api/v1/auth/login", "/api/v1/auth/refresh")
                         .permitAll()
@@ -64,5 +76,31 @@ public class SecurityConfig {
                 .addFilterBefore(new JwtAuthenticationFilter(jwtService), UsernamePasswordAuthenticationFilter.class)
                 .addFilterBefore(loginRateLimitFilter, JwtAuthenticationFilter.class);
         return http.build();
+    }
+
+    @Bean
+    public CorsConfigurationSource corsConfigurationSource(
+            @Value("${sentinel.cors.allowed-origins:}") String rawAllowedOrigins) {
+        // Sem property.split-values do Spring pra evitar um elemento "" fantasma na lista quando
+        // a property está vazia (o que bloquearia sub-repticiamente todas as origens de verdade).
+        List<String> allowedOrigins = Arrays.stream(rawAllowedOrigins.split(","))
+                .map(String::trim)
+                .filter(origin -> !origin.isEmpty())
+                .toList();
+
+        CorsConfiguration configuration = new CorsConfiguration();
+        configuration.setAllowedOrigins(allowedOrigins);
+        configuration.setAllowedMethods(List.of("GET", "POST"));
+        configuration.setAllowedHeaders(List.of("Authorization", "Content-Type"));
+        configuration.setAllowCredentials(true);
+        // Falha já na subida se allowed-origins vier com "*" — combinado com allowCredentials=true
+        // isso é inválido e, sem essa checagem, só quebraria na primeira requisição de verdade.
+        configuration.validateAllowCredentials();
+
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        // Escopo restrito a /api/v1/**: os únicos endpoints consumidos pelo frontend browser
+        // (ver docs/architecture.md) — Actuator e Swagger não precisam de CORS.
+        source.registerCorsConfiguration("/api/v1/**", configuration);
+        return source;
     }
 }

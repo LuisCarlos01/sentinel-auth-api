@@ -32,6 +32,12 @@ sentinel:
     # derrubaria a simulação bem antes de medir a performance real do fluxo.
     login-capacity: ${SENTINEL_RATE_LIMIT_LOGIN_CAPACITY:5}
     login-window-seconds: ${SENTINEL_RATE_LIMIT_LOGIN_WINDOW_SECONDS:60}
+  cors:
+    # Lista de origens permitidas, separadas por vírgula (dev + produção do sentinel-auth-web).
+    # Sem default: o frontend ainda não tem package.json/porta decidida, então falhar fechado
+    # (nenhuma origem permitida) é mais seguro que chutar uma porta comum (5173/3000) que pode
+    # nem ser a real. Configurar via SENTINEL_CORS_ALLOWED_ORIGINS assim que a porta for definida.
+    allowed-origins: ${SENTINEL_CORS_ALLOWED_ORIGINS:}
 
 management:
   endpoints:

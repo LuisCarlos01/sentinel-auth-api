@@ -11,6 +11,11 @@ sentinel:
     # @DynamicPropertySource, para testar o limite de verdade.
     login-capacity: 1000
     login-window-seconds: 60
+  cors:
+    # Valor fixo só para exercitar o comportamento de CORS nos testes — não é a origem real do
+    # sentinel-auth-web, que ainda não tem porta/framework decididos (ver
+    # sentinel.cors.allowed-origins em application.yml).
+    allowed-origins: http://localhost:5173
 
 logging:
   level:
