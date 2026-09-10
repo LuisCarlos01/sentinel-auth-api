@@ -35,9 +35,15 @@ jobs:
             POSTGRES_PASSWORD=${{ secrets.PROD_POSTGRES_PASSWORD }}
             JWT_SIGNING_KEY=${{ secrets.PROD_JWT_SIGNING_KEY }}
             ENV_FILE
-            docker compose -f docker-compose.yml -f docker-compose.prod.yml up --build -d
+            # Build isolado do up: builder e o container antigo do app rodando ao mesmo tempo
+            # já saturou a memória da t3.micro (1GB) e travou a instância inteira durante a
+            # implementação da ADR-0013 (precisou de Stop/Start manual pra recuperar). Separar
+            # não elimina o risco por completo, mas reduz a janela de sobreposição entre build
+            # e o container antigo ainda de pé.
+            docker compose -f docker-compose.yml -f docker-compose.prod.yml build app
+            docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d
 
-            # docker compose up --build -d só confirma que o container subiu, não que a
+            # docker compose up -d só confirma que o container subiu, não que a
             # aplicação respondeu de fato — sem isso o job reportaria sucesso mesmo com o
             # container em crash loop. Espera até 60s pelo health check antes de falhar.
             # Health check bate direto no container `app` (porta 8080), não através do

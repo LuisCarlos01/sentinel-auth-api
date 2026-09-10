@@ -35,12 +35,12 @@ Pré-requisito: Docker e Docker Compose instalados (não é necessário Java/Mav
 
 ## Deployment
 
-Instância de demonstração pública (AWS EC2, deploy manual — ver [ADR-0011](docs/adr/0011-aws-ec2-manual-deploy.md)):
+Instância de demonstração pública (AWS EC2, deploy manual — ver [ADR-0011](docs/adr/0011-aws-ec2-manual-deploy.md)), com HTTPS via Elastic IP + `sslip.io` + Caddy ([ADR-0013](docs/adr/0013-https-via-elastic-ip-sslip-caddy.md)):
 
-- API: `http://52.14.171.76`
-- Swagger UI: `http://52.14.171.76/swagger-ui.html`
+- API: `https://52-14-171-76.sslip.io`
+- Swagger UI: `https://52-14-171-76.sslip.io/swagger-ui.html`
 
-> Sem HTTPS/domínio próprio nesta primeira entrega (limitação conhecida e documentada em ADR-0011).
+> Sem domínio próprio/memorável nesta entrega (`sslip.io` é um hostname técnico, não uma marca) — a conexão em si é criptografada.
 
 ### Fazer seu próprio deploy (opcional)
 

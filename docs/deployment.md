@@ -145,8 +145,9 @@ O workflow **reescreve o `.env` da instância a cada deploy** a partir desses se
 
 O caminho manual (passos 1–7) continua funcionando normalmente como fallback — a automação só substitui a repetição dos passos 3 (parte do `.env`) e 5 a cada atualização, não o processo inteiro.
 
-## Limitações conhecidas desta primeira entrega (ADR-0011)
+## Limitações conhecidas
 
-- **Sem HTTPS/domínio** — tráfego em texto plano, aceitável dado que o projeto não tem usuários reais.
 - **Sem alta disponibilidade** — instância única; reiniciar o host derruba a aplicação até subir de novo manualmente.
 - **Custo não é zero para sempre** — ver ADR-0011 para o modelo de crédito da AWS e a estimativa de custo pós-crédito.
+- **HTTPS disponível desde ADR-0013** (Elastic IP + `sslip.io` + Caddy/Let's Encrypt) — validado ponta a ponta em produção: certificado válido, cookie `Secure` do refresh token (ADR-0009) retido corretamente. Não é domínio próprio/memorável, mas a conexão é criptografada.
+- **Build na própria instância é sensível a memória** — a `t3.micro` só tem 1GB de RAM; rodar `docker compose up --build` enquanto o container antigo do `app` ainda está de pé (ex.: durante um redeploy) pode saturar a memória e travar a instância inteira (SSH incluído), exigindo um Stop/Start manual via console para recuperar — já aconteceu na implementação da ADR-0013. Mitigação aplicada no runbook: `docker compose build app` isolado antes do `up`, evitando compilar e servir ao mesmo tempo.
