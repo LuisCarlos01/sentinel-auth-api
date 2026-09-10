@@ -25,3 +25,4 @@ Este diretório reúne os registros de decisões arquiteturais do `sentinel-auth
 | [0010](0010-in-memory-rate-limiting-on-login.md) | Rate limiting em memória no login, via Bucket4j | Accepted |
 | [0011](0011-aws-ec2-manual-deploy.md) | Deploy do v1.0.0 em EC2 (AWS), manual, sem RDS/HTTPS/domínio | Accepted |
 | [0012](0012-cors-configuration.md) | Configuração de CORS para clientes browser | Accepted |
+| [0013](0013-https-via-elastic-ip-sslip-caddy.md) | HTTPS via Elastic IP + sslip.io + reverse proxy (Caddy) com Let's Encrypt | Accepted |
