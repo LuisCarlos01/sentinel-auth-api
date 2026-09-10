@@ -15,7 +15,10 @@ jobs:
     steps:
       # Reaproveita exatamente o mesmo git pull + docker compose up --build -d do deploy manual
       # (docs/deployment.md, ADR-0011) — sem registry de imagem (Docker Hub/ECR), a EC2 builda a
-      # própria imagem a partir do Dockerfile do repo, como no primeiro deploy.
+      # própria imagem a partir do Dockerfile do repo, como no primeiro deploy. O overlay
+      # docker-compose.prod.yml (ADR-0013) adiciona o Caddy/HTTPS; não depende de nenhum
+      # secret novo, já que o hostname sslip.io não é sensível e fica só no `Caddyfile`
+      # da instância (não commitado).
       - name: Deploy to EC2 via SSH
         uses: appleboy/ssh-action@v1.2.5
         with:
@@ -32,13 +35,16 @@ jobs:
             POSTGRES_PASSWORD=${{ secrets.PROD_POSTGRES_PASSWORD }}
             JWT_SIGNING_KEY=${{ secrets.PROD_JWT_SIGNING_KEY }}
             ENV_FILE
-            docker compose up --build -d
+            docker compose -f docker-compose.yml -f docker-compose.prod.yml up --build -d
 
             # docker compose up --build -d só confirma que o container subiu, não que a
             # aplicação respondeu de fato — sem isso o job reportaria sucesso mesmo com o
             # container em crash loop. Espera até 60s pelo health check antes de falhar.
+            # Health check bate direto no container `app` (porta 8080), não através do
+            # Caddy (porta 80/443, ADR-0013) — evita que um problema pontual de TLS/ACME
+            # reprove um deploy cuja aplicação subiu normalmente.
             for i in $(seq 1 12); do
-              if curl -sf http://localhost/actuator/health > /dev/null; then
+              if curl -sf http://localhost:8080/actuator/health > /dev/null; then
                 echo "Deploy healthy."
                 exit 0
               fi

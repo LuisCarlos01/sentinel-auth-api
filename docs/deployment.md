@@ -15,8 +15,10 @@ No Console AWS (região **us-east-1**, conforme ADR-0011):
 5. **Network settings / Security group**: crie um novo grupo com estas regras de entrada:
    - `SSH` (porta 22) — origem `0.0.0.0/0` (ADR-0011: aceitável para este perfil de projeto, autenticação é só por chave).
    - `HTTP` (porta 80) — origem `0.0.0.0/0`.
+   - `HTTPS` (porta 443) — origem `0.0.0.0/0` (ADR-0013 — necessária para o Caddy/Let's Encrypt).
 6. **Storage**: 20 GB `gp3` (default do free tier costuma ser suficiente; ajuste se precisar).
 7. **Launch instance**. Anote o **IP público** exibido depois que a instância entrar em estado `running`.
+8. **Elastic IP** (ADR-0013): aloque um Elastic IP (`EC2 → Network & Security → Elastic IPs → Allocate`) e associe-o a esta instância. Sem isso, o IP público muda a cada `stop`/`start` (passo 7 da seção "Depois de validado" abaixo) e quebraria o hostname `sslip.io` calculado a partir dele. Um Elastic IP é gratuito **enquanto associado a uma instância em execução** — nunca deixe um alocado e sem associar, custa por hora.
 
 ## 2. Conectar via SSH e instalar Docker
 
@@ -69,25 +71,26 @@ Edite o `.env` na instância (`nano .env` ou similar):
 
 Esse `.env` fica **só na instância** — nunca é commitado (mesma regra do `.gitignore` já existente no repo).
 
-## 4. Mapear a porta 80 (só nesta instância, não no repositório)
+## 4. Configurar HTTPS (Caddy + sslip.io) — ADR-0013
 
-Crie um `docker-compose.override.yml` **na instância** (não commitado, entra no `.gitignore` da própria instância ou simplesmente não é versionado ali) para expor a porta 80 sem mexer no `docker-compose.yml` do repositório (ADR-0011: mudança de ambiente, não de aplicação):
+Calcule o hostname a partir do Elastic IP alocado no passo 8 acima: troque os pontos por hifens e acrescente `.sslip.io` (ex.: `18.117.253.110` → `18-117-253-110.sslip.io`). `sslip.io` não exige cadastro nem configuração própria — o nome já resolve para o IP embutido nele.
 
-```yaml
-# docker-compose.override.yml (só nesta instância — não commitar)
-services:
-  app:
-    ports:
-      - "80:8080"
+Na instância, copie o template committed e preencha o hostname real:
+
+```bash
+cp Caddyfile.example Caddyfile
+# edite Caddyfile e troque {PLACEHOLDER} pelo hostname calculado acima
 ```
 
-O Docker Compose já mescla `docker-compose.yml` + `docker-compose.override.yml` automaticamente, sem precisar de flag extra. O container fica com **duas** portas mapeadas (`8080:8080` do repo + `80:8080` do override) — inofensivo: o security group da instância só libera `22`/`80`, então `8080` não fica alcançável de fora mesmo mapeada.
+`Caddyfile` **não é commitado** (está no `.gitignore` do repositório, mesmo tratamento do `.env`) — é específico desta instância. Se esta instância já tiver um `docker-compose.override.yml` de uma configuração anterior (mapeamento manual `80:8080`, do runbook antigo), **apague-o**: o Caddy agora é quem ocupa a porta 80 do host, e um `docker-compose.override.yml` remanescente seria mesclado automaticamente em qualquer `docker compose up` futuro sem `-f` explícito, conflitando com a porta do Caddy.
 
 ## 5. Subir a aplicação
 
 ```bash
-docker compose up --build -d
+docker compose -f docker-compose.yml -f docker-compose.prod.yml up --build -d
 ```
+
+O overlay `docker-compose.prod.yml` (committed) adiciona o serviço `caddy`, que expõe `80`/`443`, faz proxy para `app:8080` e obtém/renova automaticamente um certificado Let's Encrypt (desafio HTTP-01) para o hostname configurado no `Caddyfile`.
 
 Acompanhe os logs até confirmar que a aplicação subiu e as migrations Flyway rodaram:
 
@@ -95,22 +98,29 @@ Acompanhe os logs até confirmar que a aplicação subiu e as migrations Flyway 
 docker compose logs -f app
 ```
 
-## 6. Validar o deploy (critérios de aceite da issue #22)
-
-Do seu próprio computador (substitua `<IP-PÚBLICO>`):
+Acompanhe também o Caddy até ver a confirmação de emissão do certificado (algo como "certificate obtained successfully"):
 
 ```bash
-curl http://<IP-PÚBLICO>/actuator/health
-curl http://<IP-PÚBLICO>/swagger-ui.html -I
-curl -X POST http://<IP-PÚBLICO>/api/v1/auth/register \
+docker compose logs -f caddy
+```
+
+## 6. Validar o deploy (critérios de aceite da issue #22 + HTTPS da ADR-0013)
+
+Do seu próprio computador (substitua `<HOSTNAME>` pelo hostname `sslip.io` calculado no passo 4):
+
+```bash
+curl -I http://<HOSTNAME> # espera redirect (30x) para https
+curl -v https://<HOSTNAME>/actuator/health # espera cadeia de certificado válida, sem -k
+curl https://<HOSTNAME>/swagger-ui.html -I
+curl -X POST https://<HOSTNAME>/api/v1/auth/register \
   -H "Content-Type: application/json" \
   -d '{"email":"smoke-test@example.com","password":"Str0ngP@ssw0rd!"}'
-curl -X POST http://<IP-PÚBLICO>/api/v1/auth/login \
+curl -X POST https://<HOSTNAME>/api/v1/auth/login \
   -H "Content-Type: application/json" \
   -d '{"email":"smoke-test@example.com","password":"Str0ngP@ssw0rd!"}'
 ```
 
-Um `login` bem-sucedido retorna `accessToken`/`refreshToken` — use o `refreshToken` para testar `refresh` e `logout` da mesma forma. Para o critério de RBAC (`GET /api/v1/users` → `403` sem papel `ADMIN`), qualquer usuário recém-registrado já serve (papel padrão é `USER`).
+Um `login` bem-sucedido retorna `accessToken`/`refreshToken` — use o `refreshToken` para testar `refresh` e `logout` da mesma forma. Para o critério de RBAC (`GET /api/v1/users` → `403` sem papel `ADMIN`), qualquer usuário recém-registrado já serve (papel padrão é `USER`). Valide também, com um cliente que preserve cookies (`curl -c/-b` ou o navegador), que o cookie do refresh token agora é retido entre chamadas — é o comportamento que a issue #24 reportava como quebrado sob HTTP puro.
 
 ## 7. Depois de validado
 
@@ -119,7 +129,7 @@ Um `login` bem-sucedido retorna `accessToken`/`refreshToken` — use o `refreshT
 
 ## 8. Deploy automatizado (issue #23)
 
-Depois do primeiro deploy manual (passos 1–7 acima), deploys seguintes podem ser automatizados via GitHub Actions (`.github/workflows/deploy.yml`): a cada push em `main`, depois que o workflow `CI` passar, o `Deploy` conecta via SSH na instância e roda o mesmo `git pull && docker compose up --build -d` do passo 5 — sem registry de imagem (Docker Hub/ECR), a EC2 continua buildando a própria imagem (ADR-0011). Depois de subir, o workflow espera até 60s pelo `/actuator/health` responder — se não responder, o job falha e mostra os últimos logs do container, em vez de reportar sucesso com a aplicação travada.
+Depois do primeiro deploy manual (passos 1–7 acima), deploys seguintes podem ser automatizados via GitHub Actions (`.github/workflows/deploy.yml`): a cada push em `main`, depois que o workflow `CI` passar, o `Deploy` conecta via SSH na instância e roda o mesmo `git pull && docker compose -f docker-compose.yml -f docker-compose.prod.yml up --build -d` do passo 5 — sem registry de imagem (Docker Hub/ECR), a EC2 continua buildando a própria imagem (ADR-0011). Depois de subir, o workflow espera até 60s pelo `app` responder em `http://localhost:8080/actuator/health` (direto no container, sem passar pelo Caddy — ADR-0013) — se não responder, o job falha e mostra os últimos logs do container, em vez de reportar sucesso com a aplicação travada.
 
 **Secrets necessários** (`Settings → Secrets and variables → Actions` do repositório no GitHub):
 

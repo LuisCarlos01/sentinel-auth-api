@@ -1,0 +1,6 @@
+# Substitua {PLACEHOLDER} pelo hostname sslip.io real (IP elástico da instância,
+# com hifens no lugar dos pontos) antes de copiar este arquivo para `Caddyfile`
+# na instância — ver docs/deployment.md, seção "Configurar HTTPS (Caddy + sslip.io)".
+{PLACEHOLDER}.sslip.io {
+    reverse_proxy app:8080
+}

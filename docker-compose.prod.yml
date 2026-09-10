@@ -1,0 +1,22 @@
+# Overlay de produção (ADR-0013): docker compose -f docker-compose.yml -f docker-compose.prod.yml up --build -d
+# Adiciona o Caddy como reverse proxy com HTTPS automático (Let's Encrypt via
+# desafio HTTP-01) na frente do container `app`. Não remove a porta 8080
+# publicada pelo `app` no docker-compose.yml base — o security group da
+# instância só libera 22/80/443, então 8080 já não é alcançável de fora mesmo
+# publicada (mesmo raciocínio já documentado em docs/deployment.md).
+services:
+  caddy:
+    image: caddy:2-alpine
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    depends_on:
+      - app
+
+volumes:
+  caddy_data:
+  caddy_config:

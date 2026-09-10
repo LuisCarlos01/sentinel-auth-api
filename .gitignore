@@ -16,3 +16,7 @@ target/
 
 # Environment secrets
 .env
+
+# Caddy config real da instância (hostname sslip.io específico do ambiente) —
+# ver Caddyfile.example para o template committed.
+Caddyfile

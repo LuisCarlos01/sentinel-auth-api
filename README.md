@@ -46,11 +46,12 @@ Instância de demonstração pública (AWS EC2, deploy manual — ver [ADR-0011]
 
 Quer rodar sua própria instância na AWS em vez de só usar a de demonstração acima? Resumo rápido (passo a passo completo em [`docs/deployment.md`](docs/deployment.md)):
 
-1. Suba uma EC2 `t3.micro` (Amazon Linux 2023), com o security group liberando `22` (SSH, só chave) e `80`.
-2. Instale Docker + o plugin `docker compose` na instância.
-3. Clone o repositório, copie `.env.example` para `.env` e ajuste `JWT_SIGNING_KEY`/`POSTGRES_PASSWORD` com valores reais.
-4. Adicione um `docker-compose.override.yml` só na instância, mapeando `80:8080`.
-5. `docker compose up --build -d`.
+1. Suba uma EC2 `t3.micro` (Amazon Linux 2023), com o security group liberando `22` (SSH, só chave), `80` e `443`.
+2. Aloque um Elastic IP e associe à instância (ADR-0013 — mantém o IP estável entre `stop`/`start`).
+3. Instale Docker + os plugins `docker compose`/`docker buildx` na instância.
+4. Clone o repositório, copie `.env.example` para `.env` e ajuste `JWT_SIGNING_KEY`/`POSTGRES_PASSWORD` com valores reais.
+5. Copie `Caddyfile.example` para `Caddyfile` e preencha o hostname `sslip.io` calculado a partir do Elastic IP (ver `docs/deployment.md`).
+6. `docker compose -f docker-compose.yml -f docker-compose.prod.yml up --build -d`.
 
 ## Roadmap
 
