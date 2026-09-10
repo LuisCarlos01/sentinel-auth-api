@@ -37,8 +37,8 @@ Pré-requisito: Docker e Docker Compose instalados (não é necessário Java/Mav
 
 Instância de demonstração pública (AWS EC2, deploy manual — ver [ADR-0011](docs/adr/0011-aws-ec2-manual-deploy.md)):
 
-- API: `http://18.117.253.110`
-- Swagger UI: `http://18.117.253.110/swagger-ui.html`
+- API: `http://3.17.190.178`
+- Swagger UI: `http://3.17.190.178/swagger-ui.html`
 
 > Sem HTTPS/domínio próprio nesta primeira entrega (limitação conhecida e documentada em ADR-0011).
 

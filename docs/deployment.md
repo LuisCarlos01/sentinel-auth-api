@@ -6,7 +6,7 @@ Este documento é o passo a passo para **quem for executar o deploy manualmente*
 
 ## 1. Provisionar a instância EC2
 
-No Console AWS (região **us-east-1**, conforme ADR-0011):
+No Console AWS (região **us-east-2**, Ohio — corrigido em ADR-0011, o valor anterior `us-east-1` estava errado):
 
 1. **EC2 → Launch Instance**.
 2. **AMI**: Amazon Linux 2023 (free tier eligible).

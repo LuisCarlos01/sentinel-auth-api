@@ -4,17 +4,19 @@
 
 Accepted
 
+> **Correção factual (2026-09-10):** este ADR registrava a região como `us-east-1`. A instância provisionada de fato está em `us-east-2` (Ohio) — confirmado no console AWS ao trabalhar na ADR-0013. Preço on-demand do `t3.micro` verificado como idêntico entre as duas regiões (US$ 0,0104/hora), então as estimativas de custo abaixo continuam válidas; só o nome da região estava errado. Não é uma revisão de decisão (não muda `t3.micro`/deploy manual/sem RDS-HTTPS-domínio), por isso corrigido no lugar em vez de um novo ADR.
+
 ## Contexto
 
 O PRD (`docs/prd.md`, seção 3 — "Objetivos e critério de sucesso") registra como requisito forte, não opcional, que "o projeto está rodando em algum lugar (deploy funcional), não apenas em ambiente local do autor". Os 9 critérios funcionais do `v1.0.0` (seção 4 do PRD) já estavam implementados ao final da v0.5.0 — faltava só esse requisito não-funcional de implantação pública.
 
 A escolha de provedor e topologia de deploy não tinha ADR nem PRD prévio — foi decidida em sessão de grilling com o dono do projeto, motivada por um objetivo de aprendizado explícito (primeira experiência real de "subir Docker" em um provedor de nuvem) e pelo plano de, em breve, hospedar também um frontend simples (login/cadastro/recuperação de senha) no mesmo provedor para validar UI/UX contra os endpoints reais.
 
-Durante o grilling, verificamos que o antigo modelo "EC2 grátis por 12 meses (750h/mês)" **não existe mais** — a AWS substituiu isso por um crédito de até US$ 200, válido pelo menor entre 6 meses ou o esgotamento do crédito. Depois disso, uma `t3.micro` rodando 24/7 custa cerca de **US$ 7,59/mês** de computação (US$ 0,0104/hora × 730h, região us-east-1) mais ~US$ 1,60/mês de armazenamento EBS (`gp3`, ~20GB) — total estimado **US$ 9–10/mês**, ou próximo de zero se a instância for parada quando ociosa.
+Durante o grilling, verificamos que o antigo modelo "EC2 grátis por 12 meses (750h/mês)" **não existe mais** — a AWS substituiu isso por um crédito de até US$ 200, válido pelo menor entre 6 meses ou o esgotamento do crédito. Depois disso, uma `t3.micro` rodando 24/7 custa cerca de **US$ 7,59/mês** de computação (US$ 0,0104/hora × 730h, região us-east-2 (Ohio)) mais ~US$ 1,60/mês de armazenamento EBS (`gp3`, ~20GB) — total estimado **US$ 9–10/mês**, ou próximo de zero se a instância for parada quando ociosa.
 
 ## Decisão
 
-Deploy do `sentinel-auth-api` em uma instância **EC2 `t3.micro`** (AWS, região `us-east-1`), rodando o `docker-compose.yml` já existente no repositório **sem modificação de arquitetura** — API e Postgres no mesmo host, mesmo container/composição usada em desenvolvimento local. Nenhum serviço gerenciado novo (RDS, ALB, Route53, ACM) entra nesta decisão.
+Deploy do `sentinel-auth-api` em uma instância **EC2 `t3.micro`** (AWS, região `us-east-2` (Ohio)), rodando o `docker-compose.yml` já existente no repositório **sem modificação de arquitetura** — API e Postgres no mesmo host, mesmo container/composição usada em desenvolvimento local. Nenhum serviço gerenciado novo (RDS, ALB, Route53, ACM) entra nesta decisão.
 
 Escopo explicitamente **dividido em dois entregáveis independentes**:
 
@@ -60,4 +62,4 @@ Outras decisões operacionais fechadas junto:
 
 - [`docs/prd.md`](../prd.md) — seção 3 (critério de sucesso) e seção 4 (escopo funcional do `v1.0.0`).
 - [ADR-0009](0009-dual-channel-refresh-token-delivery.md) — cookie `Secure` do refresh token, requisito que só se torna rígido quando HTTPS entrar em escopo (fora desta decisão).
-- Grilling desta decisão (sessão registrada na conversa, sem documento próprio além deste ADR) — inclui a verificação factual do modelo de crédito atual da AWS (substituindo o antigo "12 meses grátis") e do preço on-demand de `t3.micro` (AWS EC2 On-Demand Pricing, região us-east-1).
+- Grilling desta decisão (sessão registrada na conversa, sem documento próprio além deste ADR) — inclui a verificação factual do modelo de crédito atual da AWS (substituindo o antigo "12 meses grátis") e do preço on-demand de `t3.micro` (AWS EC2 On-Demand Pricing, região us-east-2 (Ohio)).
