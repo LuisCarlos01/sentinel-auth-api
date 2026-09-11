@@ -26,3 +26,4 @@ Este diretório reúne os registros de decisões arquiteturais do `sentinel-auth
 | [0011](0011-aws-ec2-manual-deploy.md) | Deploy do v1.0.0 em EC2 (AWS), manual, sem RDS/HTTPS/domínio | Accepted |
 | [0012](0012-cors-configuration.md) | Configuração de CORS para clientes browser | Accepted |
 | [0013](0013-https-via-elastic-ip-sslip-caddy.md) | HTTPS via Elastic IP + sslip.io + reverse proxy (Caddy) com Let's Encrypt | Accepted |
+| [0014](0014-cross-origin-refresh-token-via-body.md) | Cliente web usa o corpo JSON (não o cookie) para refresh em topologia cross-origin | Accepted |

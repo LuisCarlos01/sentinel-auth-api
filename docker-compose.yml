@@ -8,6 +8,7 @@ services:
       DB_USER: ${POSTGRES_USER:-sentinel}
       DB_PASSWORD: ${POSTGRES_PASSWORD:-sentinel}
       JWT_SIGNING_KEY: ${JWT_SIGNING_KEY:-dev-only-signing-key-never-use-in-production-1234567890}
+      SENTINEL_CORS_ALLOWED_ORIGINS: ${SENTINEL_CORS_ALLOWED_ORIGINS:-}
     depends_on:
       postgres:
         condition: service_healthy

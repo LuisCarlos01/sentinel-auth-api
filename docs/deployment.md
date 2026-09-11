@@ -140,6 +140,7 @@ Depois do primeiro deploy manual (passos 1–7 acima), deploys seguintes podem s
 | `DEPLOY_SSH_KEY` | Conteúdo do `.pem` gerado no passo 1 (chave privada completa) |
 | `PROD_JWT_SIGNING_KEY` | O mesmo valor real de produção usado no `.env` da instância |
 | `PROD_POSTGRES_PASSWORD` | O mesmo valor real de produção usado no `.env` da instância |
+| `SENTINEL_CORS_ALLOWED_ORIGINS` | Origens permitidas por CORS (ADR-0012), separadas por vírgula — ex.: origem do frontend implantado |
 
 O workflow **reescreve o `.env` da instância a cada deploy** a partir desses secrets — não depende do `.env` manual criado no passo 3 continuar existindo por conta própria.
 

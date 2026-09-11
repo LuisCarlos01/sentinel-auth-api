@@ -34,6 +34,7 @@ jobs:
             POSTGRES_USER=sentinel
             POSTGRES_PASSWORD=${{ secrets.PROD_POSTGRES_PASSWORD }}
             JWT_SIGNING_KEY=${{ secrets.PROD_JWT_SIGNING_KEY }}
+            SENTINEL_CORS_ALLOWED_ORIGINS=${{ secrets.SENTINEL_CORS_ALLOWED_ORIGINS }}
             ENV_FILE
             # Build isolado do up: builder e o container antigo do app rodando ao mesmo tempo
             # já saturou a memória da t3.micro (1GB) e travou a instância inteira durante a
