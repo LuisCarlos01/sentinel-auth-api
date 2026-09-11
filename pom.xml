@@ -24,6 +24,9 @@
         <bucket4j.version>8.14.0</bucket4j.version>
         <caffeine.version>3.2.0</caffeine.version>
         <jacoco.version>0.8.15</jacoco.version>
+        <!-- Override do BOM do Spring Boot (que gerencia pra 42.7.11) — CVE-2026-53712/CVE-2026-42198,
+             fixadas em 42.7.12+ (auditoria de segurança, achado #5). -->
+        <postgresql.version>42.7.13</postgresql.version>
     </properties>
 
     <dependencies>
@@ -62,7 +65,10 @@
         <dependency>
             <groupId>org.bouncycastle</groupId>
             <artifactId>bcprov-jdk18on</artifactId>
-            <version>1.80</version>
+            <!-- 1.86: CVE-2026-0636 (LDAP injection) e CVE-2026-5598, fixadas em 1.84+ — não
+                 exploráveis aqui (sem uso de LDAP/FrodoKEM), upgrade por precaução de qualquer
+                 forma (auditoria de segurança, achado #4). -->
+            <version>1.86</version>
             <scope>runtime</scope>
         </dependency>
 

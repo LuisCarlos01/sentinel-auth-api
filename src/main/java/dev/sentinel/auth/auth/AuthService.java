@@ -43,6 +43,14 @@ public class AuthService {
     private final Duration refreshTokenTtl;
     private final SecureRandom secureRandom = new SecureRandom();
 
+    // Hash Argon2id de um valor fixo (não corresponde a nenhuma senha real), computado uma vez
+    // na subida — comparado no login quando o e-mail não existe, pra gastar tempo equivalente ao
+    // caminho de senha errada (que roda passwordEncoder.matches contra um hash real). Sem isso, a
+    // ausência do custo do Argon2id tornaria e-mail-inexistente perceptivelmente mais rápido que
+    // senha-errada, permitindo enumerar contas por tempo de resposta mesmo com a mesma mensagem de
+    // erro (auditoria de segurança, achado #2).
+    private final String dummyPasswordHash;
+
     public AuthService(
             UserRepository userRepository,
             RoleRepository roleRepository,
@@ -56,6 +64,7 @@ public class AuthService {
         this.passwordEncoder = passwordEncoder;
         this.jwtService = jwtService;
         this.refreshTokenTtl = Duration.ofDays(refreshTokenTtlDays);
+        this.dummyPasswordHash = passwordEncoder.encode("timing-parity-dummy-password");
     }
 
     /** TTL do Refresh token, usado por {@code AuthController} para o {@code Max-Age} do cookie (ADR-0009). */
@@ -94,13 +103,19 @@ public class AuthService {
         // Email inexistente, senha errada, conta locked ou desabilitada: todos resultam na mesma
         // InvalidCredentialsException, sem distinção, para não vazar qual condição falhou (nem no
         // código nem na resposta ao cliente).
-        User user = userRepository.findByEmail(request.email()).orElseThrow(InvalidCredentialsException::new);
-
-        if (user.isLocked() || !user.isEnabled()) {
+        var maybeUser = userRepository.findByEmail(request.email());
+        if (maybeUser.isEmpty()) {
+            // Gasta o mesmo custo de Argon2id do caminho de senha errada, mesmo sem usuário real
+            // pra comparar (achado #2 da auditoria) — resultado descartado de propósito.
+            passwordEncoder.matches(request.password(), dummyPasswordHash);
             throw new InvalidCredentialsException();
         }
+        User user = maybeUser.get();
 
-        if (!passwordEncoder.matches(request.password(), user.getPasswordHash())) {
+        // Mesmo custo de Argon2id independente de locked/enabled, senão essa condição também
+        // ficaria distinguível por tempo de resposta (mesma classe de achado #2).
+        boolean passwordMatches = passwordEncoder.matches(request.password(), user.getPasswordHash());
+        if (user.isLocked() || !user.isEnabled() || !passwordMatches) {
             throw new InvalidCredentialsException();
         }
 

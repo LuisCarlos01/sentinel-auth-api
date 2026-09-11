@@ -167,7 +167,11 @@ class AuthServiceTest {
 
             assertThatThrownBy(() -> authService.login(request)).isInstanceOf(InvalidCredentialsException.class);
 
-            verifyNoInteractions(passwordEncoder, jwtService, refreshTokenRepository);
+            // passwordEncoder É chamado mesmo sem usuário real — paridade de tempo com o caminho
+            // de senha errada, pra não permitir enumerar e-mails por timing (auditoria de
+            // segurança, achado #2). jwtService/refreshTokenRepository continuam intocados.
+            verify(passwordEncoder).matches(eq(request.password()), any());
+            verifyNoInteractions(jwtService, refreshTokenRepository);
         }
 
         @Test
@@ -179,7 +183,10 @@ class AuthServiceTest {
 
             assertThatThrownBy(() -> authService.login(request)).isInstanceOf(InvalidCredentialsException.class);
 
-            verifyNoInteractions(passwordEncoder, jwtService, refreshTokenRepository);
+            // Mesma paridade de tempo do achado #2: locked também não pode ser mais rápido que
+            // senha errada.
+            verify(passwordEncoder).matches(request.password(), user.getPasswordHash());
+            verifyNoInteractions(jwtService, refreshTokenRepository);
         }
 
         @Test
@@ -191,7 +198,8 @@ class AuthServiceTest {
 
             assertThatThrownBy(() -> authService.login(request)).isInstanceOf(InvalidCredentialsException.class);
 
-            verifyNoInteractions(passwordEncoder, jwtService, refreshTokenRepository);
+            verify(passwordEncoder).matches(request.password(), user.getPasswordHash());
+            verifyNoInteractions(jwtService, refreshTokenRepository);
         }
 
         @Test

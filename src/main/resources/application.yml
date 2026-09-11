@@ -1,3 +1,10 @@
+server:
+  # Sem isso, request.getRemoteAddr() (usado pelo LoginRateLimitFilter, ADR-0010) vê o IP do
+  # Caddy (ADR-0013), não o do cliente real — todo tráfego externo compartilharia um único
+  # bucket de IP, quebrando a proteção por atacante (auditoria de segurança, achado #1). Caddy
+  # já envia X-Forwarded-For por padrão; isso só faz o Spring confiar e usar esse valor.
+  forward-headers-strategy: framework
+
 spring:
   application:
     name: sentinel-auth-api
