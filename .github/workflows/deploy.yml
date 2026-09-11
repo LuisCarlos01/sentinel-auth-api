@@ -36,11 +36,12 @@ jobs:
             JWT_SIGNING_KEY=${{ secrets.PROD_JWT_SIGNING_KEY }}
             SENTINEL_CORS_ALLOWED_ORIGINS=${{ secrets.SENTINEL_CORS_ALLOWED_ORIGINS }}
             ENV_FILE
-            # Build isolado do up: builder e o container antigo do app rodando ao mesmo tempo
-            # já saturou a memória da t3.micro (1GB) e travou a instância inteira durante a
-            # implementação da ADR-0013 (precisou de Stop/Start manual pra recuperar). Separar
-            # não elimina o risco por completo, mas reduz a janela de sobreposição entre build
-            # e o container antigo ainda de pé.
+            # Build isolado do up não bastou: builder e o container antigo do app ainda
+            # concorriam por memória durante toda a janela do build, o que já travou a
+            # instância duas vezes (ADR-0013 e commit 0b36aa3), exigindo Stop/Start manual.
+            # Agora o container antigo é parado ANTES do build — aceita um downtime maior
+            # durante o deploy em troca de eliminar essa concorrência de vez.
+            docker compose -f docker-compose.yml -f docker-compose.prod.yml stop app
             docker compose -f docker-compose.yml -f docker-compose.prod.yml build app
             docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d
 
